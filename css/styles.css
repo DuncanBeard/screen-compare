@@ -456,38 +456,38 @@ body {
 }
 
 .size-comparison-viewport {
-    padding: 2rem;
-    overflow-x: auto;
+    overflow: auto;
     background-color: var(--bg-primary);
     background-image:
         linear-gradient(var(--border-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
     background-size: 20px 20px;
     min-height: 300px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    height: 400px;
+    resize: vertical;
+    position: relative;
 }
 
 .size-comparison-canvas {
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    gap: 1.5rem;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
 }
 
-.size-comparison-canvas.overlap-center,
-.size-comparison-canvas.overlap-corner {
+.size-comparison-canvas.auto-arrange {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.size-comparison-canvas.free-arrange {
     display: block;
 }
 
-.size-comparison-canvas.stacked {
-    flex-direction: column;
-    align-items: center;
-}
-
 .screen-rect {
-    position: relative;
     background: linear-gradient(135deg, var(--screen-color) 0%, var(--screen-color-dark) 100%);
     border: 2px solid var(--screen-border);
     border-radius: 4px;
@@ -496,32 +496,99 @@ body {
     justify-content: center;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease;
+    user-select: none;
 }
 
-.screen-rect:hover {
-    transform: scale(1.02);
-    z-index: 10;
+.screen-rect.draggable {
+    position: absolute;
+    cursor: grab;
+    transition: box-shadow 0.2s ease;
 }
 
-.overlap-center .screen-rect,
-.overlap-corner .screen-rect {
+.screen-rect.draggable:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.screen-rect.dragging {
+    cursor: grabbing;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    z-index: 100 !important;
+    opacity: 0.9;
+}
+
+.screen-rect.snapping {
+    transition: left 0.1s ease, top 0.1s ease;
+}
+
+/* Auto-arrange modes */
+.auto-arrange .screen-rect {
+    position: relative;
+}
+
+.auto-arrange.overlap-center,
+.auto-arrange.overlap-corner {
+    display: block;
+    padding: 2rem;
+}
+
+.auto-arrange.stacked {
+    flex-direction: column;
+    align-items: center;
+}
+
+.auto-arrange.overlap-center .screen-rect,
+.auto-arrange.overlap-corner .screen-rect {
     position: absolute;
 }
 
-.overlap-center .screen-rect {
+.auto-arrange.overlap-center .screen-rect {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
 }
 
-.overlap-center .screen-rect:hover {
-    transform: translate(-50%, -50%) scale(1.02);
+.auto-arrange.overlap-corner .screen-rect {
+    left: 2rem;
+    bottom: 2rem;
 }
 
-.overlap-corner .screen-rect {
+/* Snap guides */
+.snap-guide {
+    position: absolute;
+    background-color: var(--accent-color);
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.snap-guide.visible {
+    opacity: 1;
+}
+
+.snap-guide.horizontal {
+    height: 1px;
     left: 0;
+    right: 0;
+}
+
+.snap-guide.vertical {
+    width: 1px;
+    top: 0;
     bottom: 0;
+}
+
+/* Resize handle indicator */
+.size-comparison-viewport::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, transparent 50%, var(--text-muted) 50%, var(--text-muted) 60%, transparent 60%, transparent 70%, var(--text-muted) 70%, var(--text-muted) 80%, transparent 80%);
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .screen-rect-label {

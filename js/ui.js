@@ -317,15 +317,21 @@ const UI = {
         Storage.saveTheme(newTheme);
     },
 
+    // Store screen positions for free arrange mode
+    screenPositions: {},
+    dragState: null,
+    SNAP_THRESHOLD: 10,
+
     /**
      * Render the size comparison visualization
      * @param {Array} screens - Array of screen objects with IDs
-     * @param {string} arrangement - 'side-by-side', 'overlap-center', 'overlap-corner', or 'stacked'
+     * @param {string} arrangement - 'free', 'side-by-side', 'overlap-center', 'overlap-corner', or 'stacked'
      * @param {number} pixelsPerInch - Scale factor for rendering
      */
     renderSizeComparison(screens, arrangement, pixelsPerInch) {
         const canvas = document.getElementById('size-canvas');
         const legend = document.getElementById('size-legend');
+        const viewport = document.getElementById('size-viewport');
 
         if (!canvas || !legend) return;
 
@@ -333,66 +339,35 @@ const UI = {
         legend.innerHTML = '';
 
         // Remove previous arrangement classes
-        canvas.classList.remove('overlap-center', 'overlap-corner', 'stacked');
+        canvas.classList.remove('auto-arrange', 'free-arrange', 'overlap-center', 'overlap-corner', 'stacked');
 
         if (screens.length === 0) {
             canvas.innerHTML = '<div class="empty-state">Add screens to compare sizes</div>';
             return;
         }
 
-        // Add arrangement class
-        if (arrangement !== 'side-by-side') {
-            canvas.classList.add(arrangement);
-        }
+        const isFreeArrange = arrangement === 'free';
 
-        // Calculate dimensions and find max for overlap positioning
+        // Calculate dimensions for all screens
         const screenData = screens.map((screen, index) => {
             const dims = Calculations.toScaleDimensions(screen, pixelsPerInch);
             const colors = Calculations.screenColor(index, screens.length);
             return { screen, dims, colors, index };
         });
 
-        // Sort by area for overlap modes (largest first, so smallest is on top)
-        if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
-            screenData.sort((a, b) => (b.dims.width * b.dims.height) - (a.dims.width * a.dims.height));
-
-            // Set canvas size for overlap
-            const maxWidth = Math.max(...screenData.map(d => d.dims.width));
-            const maxHeight = Math.max(...screenData.map(d => d.dims.height));
-            canvas.style.width = `${maxWidth}px`;
-            canvas.style.height = `${maxHeight}px`;
+        if (isFreeArrange) {
+            canvas.classList.add('free-arrange');
+            this.renderFreeArrange(canvas, screenData, viewport);
         } else {
-            canvas.style.width = '';
-            canvas.style.height = '';
+            canvas.classList.add('auto-arrange');
+            if (arrangement !== 'side-by-side') {
+                canvas.classList.add(arrangement);
+            }
+            this.renderAutoArrange(canvas, screenData, arrangement);
         }
 
-        // Render each screen
-        screenData.forEach((data, displayIndex) => {
-            const { screen, dims, colors, index } = data;
-            const rect = document.createElement('div');
-            rect.className = 'screen-rect';
-            rect.style.width = `${dims.width}px`;
-            rect.style.height = `${dims.height}px`;
-            rect.style.setProperty('--screen-color', colors.main);
-            rect.style.setProperty('--screen-color-dark', colors.dark);
-            rect.style.setProperty('--screen-border', colors.border);
-
-            // For overlap, set z-index so smaller screens are on top
-            if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
-                rect.style.zIndex = displayIndex + 1;
-            }
-
-            // Only show label if screen is big enough
-            if (dims.width > 60 && dims.height > 40) {
-                rect.innerHTML = `
-                    <span class="screen-rect-label">${this.escapeHtml(screen.name)}</span>
-                    <span class="screen-rect-size">${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"</span>
-                `;
-            }
-
-            canvas.appendChild(rect);
-
-            // Add legend item
+        // Render legend
+        screenData.forEach(({ screen, dims, colors }) => {
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
             legendItem.innerHTML = `
@@ -404,6 +379,328 @@ const UI = {
             `;
             legend.appendChild(legendItem);
         });
+    },
+
+    /**
+     * Render screens in auto-arrange modes
+     */
+    renderAutoArrange(canvas, screenData, arrangement) {
+        // Sort by area for overlap modes (largest first, so smallest is on top)
+        if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
+            screenData.sort((a, b) => (b.dims.width * b.dims.height) - (a.dims.width * a.dims.height));
+        }
+
+        screenData.forEach((data, displayIndex) => {
+            const { screen, dims, colors } = data;
+            const rect = this.createScreenRect(screen, dims, colors);
+
+            if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
+                rect.style.zIndex = displayIndex + 1;
+            }
+
+            canvas.appendChild(rect);
+        });
+    },
+
+    /**
+     * Render screens in free arrange mode with drag support
+     */
+    renderFreeArrange(canvas, screenData, viewport) {
+        const viewportRect = viewport.getBoundingClientRect();
+        const padding = 20;
+
+        screenData.forEach((data, index) => {
+            const { screen, dims, colors } = data;
+            const rect = this.createScreenRect(screen, dims, colors);
+            rect.classList.add('draggable');
+            rect.dataset.screenId = screen.id;
+
+            // Get or initialize position
+            let pos = this.screenPositions[screen.id];
+            if (!pos) {
+                // Default position: spread horizontally
+                pos = {
+                    x: padding + (index * (dims.width + 20)),
+                    y: padding
+                };
+                this.screenPositions[screen.id] = pos;
+            }
+
+            rect.style.left = `${pos.x}px`;
+            rect.style.top = `${pos.y}px`;
+            rect.style.zIndex = index + 1;
+
+            // Add drag handlers
+            this.addDragHandlers(rect, screen.id, viewport);
+
+            canvas.appendChild(rect);
+        });
+    },
+
+    /**
+     * Create a screen rectangle element
+     */
+    createScreenRect(screen, dims, colors) {
+        const rect = document.createElement('div');
+        rect.className = 'screen-rect';
+        rect.style.width = `${dims.width}px`;
+        rect.style.height = `${dims.height}px`;
+        rect.style.setProperty('--screen-color', colors.main);
+        rect.style.setProperty('--screen-color-dark', colors.dark);
+        rect.style.setProperty('--screen-border', colors.border);
+
+        if (dims.width > 60 && dims.height > 40) {
+            rect.innerHTML = `
+                <span class="screen-rect-label">${this.escapeHtml(screen.name)}</span>
+                <span class="screen-rect-size">${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"</span>
+            `;
+        }
+
+        return rect;
+    },
+
+    /**
+     * Add drag event handlers to a screen rect
+     */
+    addDragHandlers(rect, screenId, viewport) {
+        const onMouseDown = (e) => {
+            if (e.button !== 0) return; // Only left click
+            e.preventDefault();
+
+            const viewportRect = viewport.getBoundingClientRect();
+            const rectBounds = rect.getBoundingClientRect();
+
+            this.dragState = {
+                screenId,
+                element: rect,
+                startX: e.clientX,
+                startY: e.clientY,
+                initialLeft: rectBounds.left - viewportRect.left + viewport.scrollLeft,
+                initialTop: rectBounds.top - viewportRect.top + viewport.scrollTop,
+                viewportRect,
+                viewport
+            };
+
+            rect.classList.add('dragging');
+
+            // Bring to front
+            const allRects = document.querySelectorAll('.screen-rect.draggable');
+            allRects.forEach(r => r.style.zIndex = '1');
+            rect.style.zIndex = '100';
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+
+        const onMouseMove = (e) => {
+            if (!this.dragState) return;
+
+            const dx = e.clientX - this.dragState.startX;
+            const dy = e.clientY - this.dragState.startY;
+
+            let newX = this.dragState.initialLeft + dx;
+            let newY = this.dragState.initialTop + dy;
+
+            // Apply snapping
+            const snapResult = this.calculateSnap(newX, newY, this.dragState.element, this.dragState.viewport);
+            newX = snapResult.x;
+            newY = snapResult.y;
+
+            // Update position
+            this.dragState.element.style.left = `${newX}px`;
+            this.dragState.element.style.top = `${newY}px`;
+
+            // Show/hide snap guides
+            this.updateSnapGuides(snapResult.guides);
+        };
+
+        const onMouseUp = () => {
+            if (!this.dragState) return;
+
+            const rect = this.dragState.element;
+            rect.classList.remove('dragging');
+
+            // Save position
+            this.screenPositions[this.dragState.screenId] = {
+                x: parseFloat(rect.style.left),
+                y: parseFloat(rect.style.top)
+            };
+
+            // Hide snap guides
+            this.updateSnapGuides({ horizontal: null, vertical: null });
+
+            this.dragState = null;
+
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        rect.addEventListener('mousedown', onMouseDown);
+
+        // Touch support
+        rect.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            onMouseDown({ clientX: touch.clientX, clientY: touch.clientY, button: 0, preventDefault: () => e.preventDefault() });
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!this.dragState) return;
+            const touch = e.touches[0];
+            onMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+        }, { passive: false });
+
+        document.addEventListener('touchend', onMouseUp);
+    },
+
+    /**
+     * Calculate snap position based on other screens
+     */
+    calculateSnap(x, y, draggedRect, viewport) {
+        const result = { x, y, guides: { horizontal: null, vertical: null } };
+        const threshold = this.SNAP_THRESHOLD;
+
+        const draggedWidth = draggedRect.offsetWidth;
+        const draggedHeight = draggedRect.offsetHeight;
+
+        // Dragged rect edges and center
+        const draggedLeft = x;
+        const draggedRight = x + draggedWidth;
+        const draggedTop = y;
+        const draggedBottom = y + draggedHeight;
+        const draggedCenterX = x + draggedWidth / 2;
+        const draggedCenterY = y + draggedHeight / 2;
+
+        // Collect snap targets from other screens
+        const snapTargetsX = [];
+        const snapTargetsY = [];
+
+        // Viewport edges and center
+        const viewportWidth = viewport.clientWidth;
+        const viewportHeight = viewport.clientHeight;
+        snapTargetsX.push({ value: 0, type: 'edge' });
+        snapTargetsX.push({ value: viewportWidth, type: 'edge' });
+        snapTargetsX.push({ value: viewportWidth / 2, type: 'center' });
+        snapTargetsY.push({ value: 0, type: 'edge' });
+        snapTargetsY.push({ value: viewportHeight, type: 'edge' });
+        snapTargetsY.push({ value: viewportHeight / 2, type: 'center' });
+
+        // Other screen edges and centers
+        const otherRects = document.querySelectorAll('.screen-rect.draggable');
+        otherRects.forEach(rect => {
+            if (rect === draggedRect) return;
+
+            const left = parseFloat(rect.style.left) || 0;
+            const top = parseFloat(rect.style.top) || 0;
+            const width = rect.offsetWidth;
+            const height = rect.offsetHeight;
+
+            // Edges
+            snapTargetsX.push({ value: left, type: 'edge' });
+            snapTargetsX.push({ value: left + width, type: 'edge' });
+            snapTargetsX.push({ value: left + width / 2, type: 'center' });
+            snapTargetsY.push({ value: top, type: 'edge' });
+            snapTargetsY.push({ value: top + height, type: 'edge' });
+            snapTargetsY.push({ value: top + height / 2, type: 'center' });
+        });
+
+        // Check horizontal snapping (left, right, center of dragged)
+        let bestSnapX = null;
+        let bestSnapDistX = threshold;
+
+        for (const target of snapTargetsX) {
+            // Snap left edge
+            const distLeft = Math.abs(draggedLeft - target.value);
+            if (distLeft < bestSnapDistX) {
+                bestSnapDistX = distLeft;
+                bestSnapX = { offset: target.value - draggedLeft, guide: target.value };
+            }
+
+            // Snap right edge
+            const distRight = Math.abs(draggedRight - target.value);
+            if (distRight < bestSnapDistX) {
+                bestSnapDistX = distRight;
+                bestSnapX = { offset: target.value - draggedRight, guide: target.value };
+            }
+
+            // Snap center
+            const distCenter = Math.abs(draggedCenterX - target.value);
+            if (distCenter < bestSnapDistX) {
+                bestSnapDistX = distCenter;
+                bestSnapX = { offset: target.value - draggedCenterX, guide: target.value };
+            }
+        }
+
+        if (bestSnapX) {
+            result.x = x + bestSnapX.offset;
+            result.guides.vertical = bestSnapX.guide;
+        }
+
+        // Check vertical snapping (top, bottom, center of dragged)
+        let bestSnapY = null;
+        let bestSnapDistY = threshold;
+
+        for (const target of snapTargetsY) {
+            // Snap top edge
+            const distTop = Math.abs(draggedTop - target.value);
+            if (distTop < bestSnapDistY) {
+                bestSnapDistY = distTop;
+                bestSnapY = { offset: target.value - draggedTop, guide: target.value };
+            }
+
+            // Snap bottom edge
+            const distBottom = Math.abs(draggedBottom - target.value);
+            if (distBottom < bestSnapDistY) {
+                bestSnapDistY = distBottom;
+                bestSnapY = { offset: target.value - draggedBottom, guide: target.value };
+            }
+
+            // Snap center
+            const distCenter = Math.abs(draggedCenterY - target.value);
+            if (distCenter < bestSnapDistY) {
+                bestSnapDistY = distCenter;
+                bestSnapY = { offset: target.value - draggedCenterY, guide: target.value };
+            }
+        }
+
+        if (bestSnapY) {
+            result.y = y + bestSnapY.offset;
+            result.guides.horizontal = bestSnapY.guide;
+        }
+
+        return result;
+    },
+
+    /**
+     * Update snap guide visibility
+     */
+    updateSnapGuides(guides) {
+        const hGuide = document.getElementById('snap-guide-h');
+        const vGuide = document.getElementById('snap-guide-v');
+
+        if (hGuide) {
+            if (guides.horizontal !== null) {
+                hGuide.style.top = `${guides.horizontal}px`;
+                hGuide.classList.add('visible');
+            } else {
+                hGuide.classList.remove('visible');
+            }
+        }
+
+        if (vGuide) {
+            if (guides.vertical !== null) {
+                vGuide.style.left = `${guides.vertical}px`;
+                vGuide.classList.add('visible');
+            } else {
+                vGuide.classList.remove('visible');
+            }
+        }
+    },
+
+    /**
+     * Clear stored screen positions (called when clearing all screens)
+     */
+    clearScreenPositions() {
+        this.screenPositions = {};
     },
 
     /**

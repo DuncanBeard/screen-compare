@@ -51,6 +51,7 @@
                 <div class="size-comparison-controls">
                     <label class="arrangement-label">Arrange:</label>
                     <select id="arrangement-select" class="select select-sm">
+                        <option value="free" selected>Free Arrange</option>
                         <option value="side-by-side">Side by Side</option>
                         <option value="overlap-center">Overlap (Center)</option>
                         <option value="overlap-corner">Overlap (Corner)</option>
@@ -65,6 +66,8 @@
                 <div class="size-comparison-canvas" id="size-canvas">
                     <!-- Scaled screen rectangles will be rendered here -->
                 </div>
+                <div class="snap-guide horizontal" id="snap-guide-h"></div>
+                <div class="snap-guide vertical" id="snap-guide-v"></div>
             </div>
             <div class="size-comparison-legend" id="size-legend">
                 <!-- Legend will be rendered here -->

@@ -5,7 +5,7 @@
 const App = {
     screens: [],
     nextId: 1,
-    arrangement: 'side-by-side',
+    arrangement: 'free',
     pixelsPerInch: 12,
 
     /**
@@ -257,6 +257,9 @@ const App = {
             card.remove();
         }
 
+        // Clear stored position for this screen
+        delete UI.screenPositions[id];
+
         this.autoSave();
         this.updateSizeComparison();
     },
@@ -267,6 +270,7 @@ const App = {
     clearAllScreens() {
         this.screens = [];
         document.getElementById('comparison-grid').innerHTML = '';
+        UI.clearScreenPositions();
         this.autoSave();
         this.updateSizeComparison();
     },

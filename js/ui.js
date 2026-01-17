@@ -315,6 +315,106 @@ const UI = {
         const newTheme = current === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', newTheme);
         Storage.saveTheme(newTheme);
+    },
+
+    /**
+     * Render the size comparison visualization
+     * @param {Array} screens - Array of screen objects with IDs
+     * @param {string} arrangement - 'side-by-side', 'overlap-center', 'overlap-corner', or 'stacked'
+     * @param {number} pixelsPerInch - Scale factor for rendering
+     */
+    renderSizeComparison(screens, arrangement, pixelsPerInch) {
+        const canvas = document.getElementById('size-canvas');
+        const legend = document.getElementById('size-legend');
+
+        if (!canvas || !legend) return;
+
+        canvas.innerHTML = '';
+        legend.innerHTML = '';
+
+        // Remove previous arrangement classes
+        canvas.classList.remove('overlap-center', 'overlap-corner', 'stacked');
+
+        if (screens.length === 0) {
+            canvas.innerHTML = '<div class="empty-state">Add screens to compare sizes</div>';
+            return;
+        }
+
+        // Add arrangement class
+        if (arrangement !== 'side-by-side') {
+            canvas.classList.add(arrangement);
+        }
+
+        // Calculate dimensions and find max for overlap positioning
+        const screenData = screens.map((screen, index) => {
+            const dims = Calculations.toScaleDimensions(screen, pixelsPerInch);
+            const colors = Calculations.screenColor(index, screens.length);
+            return { screen, dims, colors, index };
+        });
+
+        // Sort by area for overlap modes (largest first, so smallest is on top)
+        if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
+            screenData.sort((a, b) => (b.dims.width * b.dims.height) - (a.dims.width * a.dims.height));
+
+            // Set canvas size for overlap
+            const maxWidth = Math.max(...screenData.map(d => d.dims.width));
+            const maxHeight = Math.max(...screenData.map(d => d.dims.height));
+            canvas.style.width = `${maxWidth}px`;
+            canvas.style.height = `${maxHeight}px`;
+        } else {
+            canvas.style.width = '';
+            canvas.style.height = '';
+        }
+
+        // Render each screen
+        screenData.forEach((data, displayIndex) => {
+            const { screen, dims, colors, index } = data;
+            const rect = document.createElement('div');
+            rect.className = 'screen-rect';
+            rect.style.width = `${dims.width}px`;
+            rect.style.height = `${dims.height}px`;
+            rect.style.setProperty('--screen-color', colors.main);
+            rect.style.setProperty('--screen-color-dark', colors.dark);
+            rect.style.setProperty('--screen-border', colors.border);
+
+            // For overlap, set z-index so smaller screens are on top
+            if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
+                rect.style.zIndex = displayIndex + 1;
+            }
+
+            // Only show label if screen is big enough
+            if (dims.width > 60 && dims.height > 40) {
+                rect.innerHTML = `
+                    <span class="screen-rect-label">${this.escapeHtml(screen.name)}</span>
+                    <span class="screen-rect-size">${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"</span>
+                `;
+            }
+
+            canvas.appendChild(rect);
+
+            // Add legend item
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <span class="legend-color" style="background-color: ${colors.main}"></span>
+                <span class="legend-text">
+                    <strong>${this.escapeHtml(screen.name)}</strong>
+                    ${screen.size}" diagonal (${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}")
+                </span>
+            `;
+            legend.appendChild(legendItem);
+        });
+    },
+
+    /**
+     * Update zoom label
+     * @param {number} pixelsPerInch - Current zoom level
+     */
+    updateZoomLabel(pixelsPerInch) {
+        const label = document.getElementById('zoom-label');
+        if (label) {
+            label.textContent = `${pixelsPerInch} px/inch`;
+        }
     }
 };
 

@@ -206,6 +206,41 @@ const Calculations = {
             ppiRating: rating,
             ppiBarPercent
         };
+    },
+
+    /**
+     * Calculate pixel dimensions for to-scale rendering
+     * @param {Object} screen - Screen configuration
+     * @param {number} pixelsPerInch - Scale factor (pixels per inch on screen)
+     * @returns {Object} Pixel dimensions for rendering
+     */
+    toScaleDimensions(screen, pixelsPerInch) {
+        const physical = this.physicalDimensions(screen.width, screen.height, screen.size);
+        return {
+            width: Math.round(physical.width * pixelsPerInch),
+            height: Math.round(physical.height * pixelsPerInch),
+            physicalWidth: physical.width,
+            physicalHeight: physical.height
+        };
+    },
+
+    /**
+     * Generate distinct colors for screen visualization
+     * @param {number} index - Screen index
+     * @param {number} total - Total number of screens
+     * @returns {Object} Color values
+     */
+    screenColor(index, total) {
+        const hues = [210, 150, 340, 45, 280, 180, 15, 240];
+        const hue = hues[index % hues.length];
+        const saturation = 65;
+        const lightness = 50;
+
+        return {
+            main: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+            dark: `hsl(${hue}, ${saturation}%, ${lightness - 15}%)`,
+            border: `hsl(${hue}, ${saturation}%, ${lightness - 25}%)`
+        };
     }
 };
 

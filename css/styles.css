@@ -377,6 +377,203 @@ body {
     color: var(--text-primary);
 }
 
+/* Size Comparison */
+.size-comparison {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.size-comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+}
+
+.size-comparison-header h2 {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.size-comparison-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.arrangement-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.select-sm {
+    min-width: 140px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.zoom-slider {
+    width: 100px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.zoom-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.zoom-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-width: 70px;
+}
+
+.size-comparison-viewport {
+    padding: 2rem;
+    overflow-x: auto;
+    background-color: var(--bg-primary);
+    background-image:
+        linear-gradient(var(--border-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.size-comparison-canvas {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+}
+
+.size-comparison-canvas.overlap-center,
+.size-comparison-canvas.overlap-corner {
+    display: block;
+}
+
+.size-comparison-canvas.stacked {
+    flex-direction: column;
+    align-items: center;
+}
+
+.screen-rect {
+    position: relative;
+    background: linear-gradient(135deg, var(--screen-color) 0%, var(--screen-color-dark) 100%);
+    border: 2px solid var(--screen-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.screen-rect:hover {
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+.overlap-center .screen-rect,
+.overlap-corner .screen-rect {
+    position: absolute;
+}
+
+.overlap-center .screen-rect {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.overlap-center .screen-rect:hover {
+    transform: translate(-50%, -50%) scale(1.02);
+}
+
+.overlap-corner .screen-rect {
+    left: 0;
+    bottom: 0;
+}
+
+.screen-rect-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    padding: 0.25rem 0.5rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.screen-rect-size {
+    font-size: 0.625rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.size-comparison-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.legend-text {
+    color: var(--text-secondary);
+}
+
+.legend-text strong {
+    color: var(--text-primary);
+}
+
 /* Saved Configurations */
 .saved-configs {
     background-color: var(--bg-card);

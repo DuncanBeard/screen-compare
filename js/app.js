@@ -5,6 +5,8 @@
 const App = {
     screens: [],
     nextId: 1,
+    arrangement: 'side-by-side',
+    pixelsPerInch: 12,
 
     /**
      * Initialize the application
@@ -25,6 +27,9 @@ const App = {
 
         // Render saved configurations
         this.renderSavedConfigs();
+
+        // Initial size comparison render
+        this.updateSizeComparison();
     },
 
     /**
@@ -136,6 +141,24 @@ const App = {
                 document.getElementById('save-confirm').click();
             }
         });
+
+        // Size comparison controls
+        const arrangementSelect = document.getElementById('arrangement-select');
+        if (arrangementSelect) {
+            arrangementSelect.addEventListener('change', (e) => {
+                this.arrangement = e.target.value;
+                this.updateSizeComparison();
+            });
+        }
+
+        const zoomSlider = document.getElementById('size-zoom');
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => {
+                this.pixelsPerInch = parseInt(e.target.value);
+                UI.updateZoomLabel(this.pixelsPerInch);
+                this.updateSizeComparison();
+            });
+        }
     },
 
     /**
@@ -198,6 +221,7 @@ const App = {
 
         document.getElementById('comparison-grid').appendChild(card);
         this.autoSave();
+        this.updateSizeComparison();
     },
 
     /**
@@ -218,6 +242,7 @@ const App = {
         }
 
         this.autoSave();
+        this.updateSizeComparison();
     },
 
     /**
@@ -233,6 +258,7 @@ const App = {
         }
 
         this.autoSave();
+        this.updateSizeComparison();
     },
 
     /**
@@ -242,6 +268,7 @@ const App = {
         this.screens = [];
         document.getElementById('comparison-grid').innerHTML = '';
         this.autoSave();
+        this.updateSizeComparison();
     },
 
     /**
@@ -308,6 +335,13 @@ const App = {
         // Strip IDs before saving (they're session-specific)
         const toSave = this.screens.map(({ id, ...rest }) => rest);
         Storage.saveCurrent(toSave);
+    },
+
+    /**
+     * Update the size comparison visualization
+     */
+    updateSizeComparison() {
+        UI.renderSizeComparison(this.screens, this.arrangement, this.pixelsPerInch);
     }
 };
 

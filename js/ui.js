@@ -415,8 +415,9 @@ const UI = {
      * Render screens in free arrange mode with drag support
      */
     renderFreeArrange(canvas, screenData, viewport) {
-        const viewportRect = viewport.getBoundingClientRect();
         const padding = 20;
+        let maxRight = 0;
+        let maxBottom = 0;
 
         screenData.forEach((data, index) => {
             const { screen, dims, colors, isDigital } = data;
@@ -439,11 +440,19 @@ const UI = {
             rect.style.top = `${pos.y}px`;
             rect.style.zIndex = index + 1;
 
+            // Track max extent for canvas sizing
+            maxRight = Math.max(maxRight, pos.x + dims.width + padding);
+            maxBottom = Math.max(maxBottom, pos.y + dims.height + padding);
+
             // Add drag handlers
             this.addDragHandlers(rect, screen.id, viewport);
 
             canvas.appendChild(rect);
         });
+
+        // Set canvas size to fit all screens (enables scrolling)
+        canvas.style.minWidth = `${maxRight}px`;
+        canvas.style.minHeight = `${maxBottom}px`;
     },
 
     /**
@@ -459,9 +468,15 @@ const UI = {
         rect.style.setProperty('--screen-border', colors.border);
 
         if (dims.width > 60 && dims.height > 40) {
-            const sizeLabel = isDigital
-                ? `${dims.effectiveWidth} × ${dims.effectiveHeight}`
-                : `${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"`;
+            let sizeLabel;
+            if (isDigital) {
+                sizeLabel = `${dims.effectiveWidth} × ${dims.effectiveHeight}`;
+                if (screen.scale !== 100) {
+                    sizeLabel += ` @${screen.scale}%`;
+                }
+            } else {
+                sizeLabel = `${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"`;
+            }
 
             rect.innerHTML = `
                 <span class="screen-rect-label">${this.escapeHtml(screen.name)}</span>
@@ -541,6 +556,9 @@ const UI = {
 
             // Hide snap guides
             this.updateSnapGuides({ horizontal: null, vertical: null });
+
+            // Update canvas size to fit all screens
+            this.updateCanvasSize(viewport);
 
             this.dragState = null;
 
@@ -714,6 +732,32 @@ const UI = {
      */
     clearScreenPositions() {
         this.screenPositions = {};
+    },
+
+    /**
+     * Update canvas size to fit all screen rects (enables proper scrolling)
+     */
+    updateCanvasSize(viewport) {
+        const canvas = document.getElementById('size-canvas');
+        if (!canvas) return;
+
+        const rects = canvas.querySelectorAll('.screen-rect.draggable');
+        let maxRight = 0;
+        let maxBottom = 0;
+        const padding = 20;
+
+        rects.forEach(rect => {
+            const left = parseFloat(rect.style.left) || 0;
+            const top = parseFloat(rect.style.top) || 0;
+            const width = rect.offsetWidth;
+            const height = rect.offsetHeight;
+
+            maxRight = Math.max(maxRight, left + width + padding);
+            maxBottom = Math.max(maxBottom, top + height + padding);
+        });
+
+        canvas.style.minWidth = `${maxRight}px`;
+        canvas.style.minHeight = `${maxBottom}px`;
     },
 
     /**

@@ -47,8 +47,12 @@
 
         <section class="size-comparison" id="size-comparison">
             <div class="size-comparison-header">
-                <h2>Physical Size Comparison</h2>
+                <h2 id="comparison-title">Physical Size Comparison</h2>
                 <div class="size-comparison-controls">
+                    <div class="toggle-group">
+                        <button id="mode-physical" class="toggle-btn active">Physical Size</button>
+                        <button id="mode-digital" class="toggle-btn">Effective Resolution</button>
+                    </div>
                     <label class="arrangement-label">Arrange:</label>
                     <select id="arrangement-select" class="select select-sm">
                         <option value="free" selected>Free Arrange</option>

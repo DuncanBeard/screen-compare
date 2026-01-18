@@ -7,6 +7,7 @@ const App = {
     nextId: 1,
     arrangement: 'free',
     pixelsPerInch: 12,
+    viewMode: 'physical', // 'physical' or 'digital'
 
     /**
      * Initialize the application
@@ -155,10 +156,51 @@ const App = {
         if (zoomSlider) {
             zoomSlider.addEventListener('input', (e) => {
                 this.pixelsPerInch = parseInt(e.target.value);
-                UI.updateZoomLabel(this.pixelsPerInch);
+                UI.updateZoomLabel(this.pixelsPerInch, this.viewMode);
                 this.updateSizeComparison();
             });
         }
+
+        // View mode toggle
+        const modePhysical = document.getElementById('mode-physical');
+        const modeDigital = document.getElementById('mode-digital');
+
+        if (modePhysical) {
+            modePhysical.addEventListener('click', () => {
+                this.setViewMode('physical');
+            });
+        }
+
+        if (modeDigital) {
+            modeDigital.addEventListener('click', () => {
+                this.setViewMode('digital');
+            });
+        }
+    },
+
+    /**
+     * Set the view mode (physical or digital)
+     */
+    setViewMode(mode) {
+        this.viewMode = mode;
+
+        // Update toggle buttons
+        document.getElementById('mode-physical').classList.toggle('active', mode === 'physical');
+        document.getElementById('mode-digital').classList.toggle('active', mode === 'digital');
+
+        // Update title
+        const title = document.getElementById('comparison-title');
+        if (title) {
+            title.textContent = mode === 'physical' ? 'Physical Size Comparison' : 'Effective Resolution Comparison';
+        }
+
+        // Update zoom label
+        UI.updateZoomLabel(this.pixelsPerInch, mode);
+
+        // Clear positions when switching modes
+        UI.clearScreenPositions();
+
+        this.updateSizeComparison();
     },
 
     /**
@@ -345,7 +387,7 @@ const App = {
      * Update the size comparison visualization
      */
     updateSizeComparison() {
-        UI.renderSizeComparison(this.screens, this.arrangement, this.pixelsPerInch);
+        UI.renderSizeComparison(this.screens, this.arrangement, this.pixelsPerInch, this.viewMode);
     }
 };
 

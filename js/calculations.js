@@ -209,7 +209,7 @@ const Calculations = {
     },
 
     /**
-     * Calculate pixel dimensions for to-scale rendering
+     * Calculate pixel dimensions for to-scale physical rendering
      * @param {Object} screen - Screen configuration
      * @param {number} pixelsPerInch - Scale factor (pixels per inch on screen)
      * @returns {Object} Pixel dimensions for rendering
@@ -221,6 +221,23 @@ const Calculations = {
             height: Math.round(physical.height * pixelsPerInch),
             physicalWidth: physical.width,
             physicalHeight: physical.height
+        };
+    },
+
+    /**
+     * Calculate pixel dimensions for digital/effective resolution rendering
+     * Shows usable screen real estate (effective resolution after scaling)
+     * @param {Object} screen - Screen configuration
+     * @param {number} scaleFactor - Scale factor for visualization (pixels per 100 effective pixels)
+     * @returns {Object} Pixel dimensions for rendering
+     */
+    toDigitalDimensions(screen, scaleFactor) {
+        const effective = this.effectiveResolution(screen.width, screen.height, screen.scale);
+        return {
+            width: Math.round(effective.width * scaleFactor / 100),
+            height: Math.round(effective.height * scaleFactor / 100),
+            effectiveWidth: effective.width,
+            effectiveHeight: effective.height
         };
     },
 

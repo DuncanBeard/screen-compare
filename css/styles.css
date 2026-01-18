@@ -414,6 +414,36 @@ body {
     color: var(--text-secondary);
 }
 
+.toggle-group {
+    display: flex;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.toggle-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.toggle-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+}
+
+.toggle-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
 .select-sm {
     min-width: 140px;
     padding: 0.5rem 0.75rem;

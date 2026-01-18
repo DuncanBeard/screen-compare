@@ -326,9 +326,10 @@ const UI = {
      * Render the size comparison visualization
      * @param {Array} screens - Array of screen objects with IDs
      * @param {string} arrangement - 'free', 'side-by-side', 'overlap-center', 'overlap-corner', or 'stacked'
-     * @param {number} pixelsPerInch - Scale factor for rendering
+     * @param {number} scaleFactor - Scale factor for rendering
+     * @param {string} viewMode - 'physical' or 'digital'
      */
-    renderSizeComparison(screens, arrangement, pixelsPerInch) {
+    renderSizeComparison(screens, arrangement, scaleFactor, viewMode = 'physical') {
         const canvas = document.getElementById('size-canvas');
         const legend = document.getElementById('size-legend');
         const viewport = document.getElementById('size-viewport');
@@ -347,12 +348,15 @@ const UI = {
         }
 
         const isFreeArrange = arrangement === 'free';
+        const isDigital = viewMode === 'digital';
 
-        // Calculate dimensions for all screens
+        // Calculate dimensions for all screens based on view mode
         const screenData = screens.map((screen, index) => {
-            const dims = Calculations.toScaleDimensions(screen, pixelsPerInch);
+            const dims = isDigital
+                ? Calculations.toDigitalDimensions(screen, scaleFactor)
+                : Calculations.toScaleDimensions(screen, scaleFactor);
             const colors = Calculations.screenColor(index, screens.length);
-            return { screen, dims, colors, index };
+            return { screen, dims, colors, index, isDigital };
         });
 
         if (isFreeArrange) {
@@ -367,14 +371,19 @@ const UI = {
         }
 
         // Render legend
-        screenData.forEach(({ screen, dims, colors }) => {
+        screenData.forEach(({ screen, dims, colors, isDigital }) => {
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
+
+            const sizeInfo = isDigital
+                ? `${dims.effectiveWidth} × ${dims.effectiveHeight} effective pixels`
+                : `${screen.size}" diagonal (${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}")`;
+
             legendItem.innerHTML = `
                 <span class="legend-color" style="background-color: ${colors.main}"></span>
                 <span class="legend-text">
                     <strong>${this.escapeHtml(screen.name)}</strong>
-                    ${screen.size}" diagonal (${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}")
+                    ${sizeInfo}
                 </span>
             `;
             legend.appendChild(legendItem);
@@ -391,8 +400,8 @@ const UI = {
         }
 
         screenData.forEach((data, displayIndex) => {
-            const { screen, dims, colors } = data;
-            const rect = this.createScreenRect(screen, dims, colors);
+            const { screen, dims, colors, isDigital } = data;
+            const rect = this.createScreenRect(screen, dims, colors, isDigital);
 
             if (arrangement === 'overlap-center' || arrangement === 'overlap-corner') {
                 rect.style.zIndex = displayIndex + 1;
@@ -410,8 +419,8 @@ const UI = {
         const padding = 20;
 
         screenData.forEach((data, index) => {
-            const { screen, dims, colors } = data;
-            const rect = this.createScreenRect(screen, dims, colors);
+            const { screen, dims, colors, isDigital } = data;
+            const rect = this.createScreenRect(screen, dims, colors, isDigital);
             rect.classList.add('draggable');
             rect.dataset.screenId = screen.id;
 
@@ -440,7 +449,7 @@ const UI = {
     /**
      * Create a screen rectangle element
      */
-    createScreenRect(screen, dims, colors) {
+    createScreenRect(screen, dims, colors, isDigital = false) {
         const rect = document.createElement('div');
         rect.className = 'screen-rect';
         rect.style.width = `${dims.width}px`;
@@ -450,9 +459,13 @@ const UI = {
         rect.style.setProperty('--screen-border', colors.border);
 
         if (dims.width > 60 && dims.height > 40) {
+            const sizeLabel = isDigital
+                ? `${dims.effectiveWidth} × ${dims.effectiveHeight}`
+                : `${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"`;
+
             rect.innerHTML = `
                 <span class="screen-rect-label">${this.escapeHtml(screen.name)}</span>
-                <span class="screen-rect-size">${dims.physicalWidth.toFixed(1)}" × ${dims.physicalHeight.toFixed(1)}"</span>
+                <span class="screen-rect-size">${sizeLabel}</span>
             `;
         }
 
@@ -705,12 +718,17 @@ const UI = {
 
     /**
      * Update zoom label
-     * @param {number} pixelsPerInch - Current zoom level
+     * @param {number} scaleFactor - Current zoom level
+     * @param {string} viewMode - 'physical' or 'digital'
      */
-    updateZoomLabel(pixelsPerInch) {
+    updateZoomLabel(scaleFactor, viewMode = 'physical') {
         const label = document.getElementById('zoom-label');
         if (label) {
-            label.textContent = `${pixelsPerInch} px/inch`;
+            if (viewMode === 'digital') {
+                label.textContent = `${scaleFactor}% scale`;
+            } else {
+                label.textContent = `${scaleFactor} px/inch`;
+            }
         }
     }
 };

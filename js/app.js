@@ -176,6 +176,71 @@ const App = {
                 this.setViewMode('digital');
             });
         }
+
+        // Custom resize handle
+        this.initResizeHandle();
+
+        // Check for overflow on scroll
+        const viewport = document.getElementById('size-viewport');
+        if (viewport) {
+            viewport.addEventListener('scroll', () => this.updateOverflowIndicators());
+            // Also check on window resize
+            window.addEventListener('resize', () => this.updateOverflowIndicators());
+        }
+    },
+
+    /**
+     * Initialize custom resize handle for the viewport
+     */
+    initResizeHandle() {
+        const handle = document.getElementById('resize-handle');
+        const viewport = document.getElementById('size-viewport');
+
+        if (!handle || !viewport) return;
+
+        let isResizing = false;
+        let startY = 0;
+        let startHeight = 0;
+
+        handle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            startY = e.clientY;
+            startHeight = viewport.offsetHeight;
+            document.body.style.cursor = 'ns-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const dy = e.clientY - startY;
+            const newHeight = Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + dy));
+            viewport.style.height = `${newHeight}px`;
+            this.updateOverflowIndicators();
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
+    },
+
+    /**
+     * Update overflow indicators (shadows) based on scroll position
+     */
+    updateOverflowIndicators() {
+        const viewport = document.getElementById('size-viewport');
+        if (!viewport) return;
+
+        const hasOverflowRight = viewport.scrollWidth > viewport.clientWidth &&
+            viewport.scrollLeft < viewport.scrollWidth - viewport.clientWidth - 5;
+        const hasOverflowBottom = viewport.scrollHeight > viewport.clientHeight &&
+            viewport.scrollTop < viewport.scrollHeight - viewport.clientHeight - 5;
+
+        viewport.classList.toggle('has-overflow-right', hasOverflowRight);
+        viewport.classList.toggle('has-overflow-bottom', hasOverflowBottom);
     },
 
     /**
@@ -388,6 +453,8 @@ const App = {
      */
     updateSizeComparison() {
         UI.renderSizeComparison(this.screens, this.arrangement, this.pixelsPerInch, this.viewMode);
+        // Update overflow indicators after render
+        setTimeout(() => this.updateOverflowIndicators(), 0);
     }
 };
 

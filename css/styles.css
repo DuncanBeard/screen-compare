@@ -485,18 +485,68 @@ body {
     min-width: 70px;
 }
 
+.size-comparison-viewport-wrapper {
+    position: relative;
+}
+
 .size-comparison-viewport {
-    overflow: scroll;
+    overflow: auto;
     background-color: var(--bg-primary);
     background-image:
         linear-gradient(var(--border-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
     background-size: 20px 20px;
     min-height: 200px;
-    max-height: 80vh;
     height: 400px;
-    resize: vertical;
     position: relative;
+}
+
+/* Scroll shadows to indicate off-screen content */
+.size-comparison-viewport.has-overflow-right::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, rgba(0,0,0,0.1));
+    pointer-events: none;
+    z-index: 50;
+}
+
+.size-comparison-viewport.has-overflow-bottom::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.1));
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* Custom resize handle */
+.resize-handle {
+    height: 8px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resize-handle::after {
+    content: '';
+    width: 40px;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.resize-handle:hover {
+    background: var(--border-color);
 }
 
 .size-comparison-canvas {

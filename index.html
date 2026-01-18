@@ -66,12 +66,15 @@
                     <span id="zoom-label" class="zoom-label">12 px/inch</span>
                 </div>
             </div>
-            <div class="size-comparison-viewport" id="size-viewport">
-                <div class="size-comparison-canvas" id="size-canvas">
-                    <!-- Scaled screen rectangles will be rendered here -->
+            <div class="size-comparison-viewport-wrapper">
+                <div class="size-comparison-viewport" id="size-viewport">
+                    <div class="size-comparison-canvas" id="size-canvas">
+                        <!-- Scaled screen rectangles will be rendered here -->
+                    </div>
+                    <div class="snap-guide horizontal" id="snap-guide-h"></div>
+                    <div class="snap-guide vertical" id="snap-guide-v"></div>
                 </div>
-                <div class="snap-guide horizontal" id="snap-guide-h"></div>
-                <div class="snap-guide vertical" id="snap-guide-v"></div>
+                <div class="resize-handle" id="resize-handle"></div>
             </div>
             <div class="size-comparison-legend" id="size-legend">
                 <!-- Legend will be rendered here -->

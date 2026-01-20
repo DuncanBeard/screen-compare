@@ -30,18 +30,18 @@ const UI = {
                     <label>Size</label>
                     <input type="number" class="input input-small screen-size"
                            value="${screen.size}" step="0.1" min="1" max="100"
-                           aria-label="Screen size in inches">
+                           data-field="size" aria-label="Screen size in inches">
                     <span class="separator">inches</span>
                 </div>
                 <div class="input-row">
                     <label>Resolution</label>
                     <input type="number" class="input input-small screen-width"
                            value="${screen.width}" step="1" min="1"
-                           aria-label="Width in pixels">
+                           data-field="width" aria-label="Width in pixels">
                     <span class="separator">&times;</span>
                     <input type="number" class="input input-small screen-height"
                            value="${screen.height}" step="1" min="1"
-                           aria-label="Height in pixels">
+                           data-field="height" aria-label="Height in pixels">
                 </div>
                 <div class="input-row">
                     <label>Scaling</label>

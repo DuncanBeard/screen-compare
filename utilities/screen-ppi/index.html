@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Compare screen PPI, effective resolution, and scaling across different monitors and devices. Calculate pixels per inch and find equivalent display configurations.">
+    <meta name="keywords" content="PPI calculator, screen comparison, monitor resolution, display scaling, pixels per inch, effective resolution">
+    <meta property="og:title" content="Screen PPI Comparison Tool - Duncan Beard">
+    <meta property="og:description" content="Compare screen specifications, PPI, and effective resolution with scaling across multiple displays.">
+    <meta property="og:type" content="website">
+    <title>Screen PPI Comparison - Duncan Beard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/screen-ppi.css">
+</head>
+<body>
+    <!-- Grain overlay -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <nav class="nav">
+        <a href="/" class="nav-logo" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </a>
+        <div class="nav-links">
+            <a href="/utilities/" class="nav-link">Utilities</a>
+            <a href="https://github.com/duncanbeard" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="tool-main">
+        <header class="tool-header">
+            <div class="tool-header-content">
+                <a href="/utilities/" class="back-link">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Utilities
+                </a>
+                <h1 class="tool-title">Screen PPI Comparison</h1>
+                <p class="tool-desc">Compare display specifications, pixel density, and effective resolution across multiple screens.</p>
+            </div>
+        </header>
+
+        <section class="tool-controls">
+            <div class="controls-left">
+                <button id="add-screen" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Add Screen
+                </button>
+                <div class="preset-container">
+                    <select id="preset-select" class="select">
+                        <option value="">Load Preset...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="controls-right">
+                <button id="save-config" class="btn btn-ghost">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M13 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H10L14 6V13C14 13.5523 13.5523 14 13 14Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 2V6H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Save
+                </button>
+                <button id="share-config" class="btn btn-ghost">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 8V13C4 13.5523 4.44772 14 5 14H11C11.5523 14 12 13.5523 12 13V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10V2M8 2L5 5M8 2L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Share
+                </button>
+                <button id="clear-all" class="btn btn-ghost btn-danger-text">Clear All</button>
+            </div>
+        </section>
+
+        <section class="comparison-grid" id="comparison-grid">
+            <!-- Screen cards will be rendered here -->
+        </section>
+
+        <section class="size-comparison" id="size-comparison">
+            <div class="size-comparison-header">
+                <h2 id="comparison-title">Physical Size Comparison</h2>
+                <div class="size-comparison-controls">
+                    <div class="toggle-group">
+                        <button id="mode-physical" class="toggle-btn active">Physical Size</button>
+                        <button id="mode-digital" class="toggle-btn">Effective Resolution</button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Arrange:</label>
+                        <select id="arrangement-select" class="select select-sm">
+                            <option value="free" selected>Free Arrange</option>
+                            <option value="side-by-side">Side by Side</option>
+                            <option value="overlap-center">Overlap (Center)</option>
+                            <option value="overlap-corner">Overlap (Corner)</option>
+                            <option value="stacked">Stacked</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Zoom:</label>
+                        <input type="range" id="size-zoom" min="5" max="30" value="12" class="zoom-slider">
+                        <span id="zoom-label" class="zoom-value">12 px/inch</span>
+                    </div>
+                </div>
+            </div>
+            <div class="size-comparison-viewport-wrapper">
+                <div class="size-comparison-viewport" id="size-viewport">
+                    <div class="size-comparison-canvas" id="size-canvas">
+                        <!-- Scaled screen rectangles will be rendered here -->
+                    </div>
+                    <div class="snap-guide horizontal" id="snap-guide-h"></div>
+                    <div class="snap-guide vertical" id="snap-guide-v"></div>
+                </div>
+                <div class="resize-handle" id="resize-handle"></div>
+            </div>
+            <div class="size-comparison-legend" id="size-legend">
+                <!-- Legend will be rendered here -->
+            </div>
+        </section>
+
+        <section class="saved-configs" id="saved-configs">
+            <h2>Saved Configurations</h2>
+            <div class="saved-list" id="saved-list">
+                <!-- Saved configurations will be rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="save-modal">
+        <div class="modal-content">
+            <h3>Save Configuration</h3>
+            <input type="text" id="config-name" class="input" placeholder="Configuration name...">
+            <div class="modal-actions">
+                <button id="save-cancel" class="btn btn-ghost">Cancel</button>
+                <button id="save-confirm" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="share-modal">
+        <div class="modal-content">
+            <h3>Share Configuration</h3>
+            <input type="text" id="share-url" class="input" readonly>
+            <div class="modal-actions">
+                <button id="share-cancel" class="btn btn-ghost">Close</button>
+                <button id="copy-url" class="btn btn-primary">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer tool-footer">
+        <div class="footer-content">
+            <span class="footer-copyright">&copy; 2025 Duncan Beard</span>
+            <div class="footer-links">
+                <a href="https://github.com/duncanbeard" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hello@dbeard.dev">Email</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../../js/calculations.js"></script>
+    <script src="../../js/presets.js"></script>
+    <script src="../../js/storage.js"></script>
+    <script src="../../js/ui.js"></script>
+    <script src="../../js/app.js"></script>
+</body>
+</html>

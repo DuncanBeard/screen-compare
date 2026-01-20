@@ -3,118 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Compare screen PPI, effective resolution, and scaling across different monitors and devices. Calculate pixels per inch and find equivalent display configurations.">
-    <meta name="keywords" content="PPI calculator, screen comparison, monitor resolution, display scaling, pixels per inch, effective resolution">
-    <meta property="og:title" content="Screen PPI Comparison Tool">
-    <meta property="og:description" content="Compare screen specifications, PPI, and effective resolution with scaling across multiple displays.">
+    <meta name="description" content="Duncan Beard - dbeard.dev">
+    <meta property="og:title" content="Duncan Beard">
     <meta property="og:type" content="website">
-    <title>Screen PPI Comparison Tool</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Duncan Beard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .construction {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: var(--space-8);
+        }
+        .construction-title {
+            font-family: var(--font-display);
+            font-size: clamp(var(--text-3xl), 8vw, var(--text-5xl));
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-6);
+        }
+        .construction-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-8);
+        }
+        .construction-links {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <h1>Screen PPI Comparison</h1>
-            <div class="header-actions">
-                <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle dark mode">
-                    <span class="icon-sun">&#9728;</span>
-                    <span class="icon-moon">&#9790;</span>
-                </button>
-            </div>
+    <!-- Grain overlay -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <main class="construction">
+        <h1 class="construction-title">Under Construction</h1>
+        <p class="construction-subtitle">In the meantime, check out:</p>
+        <div class="construction-links">
+            <a href="/utilities/" class="btn btn-primary">Utilities</a>
+            <a href="https://github.com/duncanbeard" class="btn btn-secondary" target="_blank" rel="noopener">GitHub</a>
         </div>
-    </header>
-
-    <main class="main">
-        <section class="controls">
-            <div class="controls-left">
-                <button id="add-screen" class="btn btn-primary">+ Add Screen</button>
-                <div class="preset-container">
-                    <select id="preset-select" class="select">
-                        <option value="">Load Preset...</option>
-                    </select>
-                </div>
-            </div>
-            <div class="controls-right">
-                <button id="save-config" class="btn btn-secondary">Save</button>
-                <button id="share-config" class="btn btn-secondary">Share Link</button>
-                <button id="clear-all" class="btn btn-danger">Clear All</button>
-            </div>
-        </section>
-
-        <section class="comparison-grid" id="comparison-grid">
-            <!-- Screen cards will be rendered here -->
-        </section>
-
-        <section class="size-comparison" id="size-comparison">
-            <div class="size-comparison-header">
-                <h2 id="comparison-title">Physical Size Comparison</h2>
-                <div class="size-comparison-controls">
-                    <div class="toggle-group">
-                        <button id="mode-physical" class="toggle-btn active">Physical Size</button>
-                        <button id="mode-digital" class="toggle-btn">Effective Resolution</button>
-                    </div>
-                    <label class="arrangement-label">Arrange:</label>
-                    <select id="arrangement-select" class="select select-sm">
-                        <option value="free" selected>Free Arrange</option>
-                        <option value="side-by-side">Side by Side</option>
-                        <option value="overlap-center">Overlap (Center)</option>
-                        <option value="overlap-corner">Overlap (Corner)</option>
-                        <option value="stacked">Stacked</option>
-                    </select>
-                    <label class="arrangement-label">Zoom:</label>
-                    <input type="range" id="size-zoom" min="5" max="30" value="12" class="zoom-slider">
-                    <span id="zoom-label" class="zoom-label">12 px/inch</span>
-                </div>
-            </div>
-            <div class="size-comparison-viewport-wrapper">
-                <div class="size-comparison-viewport" id="size-viewport">
-                    <div class="size-comparison-canvas" id="size-canvas">
-                        <!-- Scaled screen rectangles will be rendered here -->
-                    </div>
-                    <div class="snap-guide horizontal" id="snap-guide-h"></div>
-                    <div class="snap-guide vertical" id="snap-guide-v"></div>
-                </div>
-                <div class="resize-handle" id="resize-handle"></div>
-            </div>
-            <div class="size-comparison-legend" id="size-legend">
-                <!-- Legend will be rendered here -->
-            </div>
-        </section>
-
-        <section class="saved-configs" id="saved-configs">
-            <h2>Saved Configurations</h2>
-            <div class="saved-list" id="saved-list">
-                <!-- Saved configurations will be rendered here -->
-            </div>
-        </section>
     </main>
-
-    <div class="modal" id="save-modal">
-        <div class="modal-content">
-            <h3>Save Configuration</h3>
-            <input type="text" id="config-name" class="input" placeholder="Configuration name...">
-            <div class="modal-actions">
-                <button id="save-confirm" class="btn btn-primary">Save</button>
-                <button id="save-cancel" class="btn btn-secondary">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="share-modal">
-        <div class="modal-content">
-            <h3>Share Configuration</h3>
-            <input type="text" id="share-url" class="input" readonly>
-            <div class="modal-actions">
-                <button id="copy-url" class="btn btn-primary">Copy to Clipboard</button>
-                <button id="share-cancel" class="btn btn-secondary">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/calculations.js"></script>
-    <script src="js/presets.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/app.js"></script>
 </body>
 </html>

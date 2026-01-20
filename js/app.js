@@ -87,10 +87,13 @@ const App = {
       }
     });
 
-    // Theme toggle
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-      UI.toggleTheme();
-    });
+    // Theme toggle (optional - may not exist if using system preferences)
+    const themeToggle = document.getElementById("theme-toggle");
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        UI.toggleTheme();
+      });
+    }
 
     // Save modal
     document.getElementById("save-confirm").addEventListener("click", () => {

@@ -3,8 +3,8 @@ const { test, expect } = require("@playwright/test");
 
 // Clear localStorage before each test to ensure clean state
 test.beforeEach(async ({ page }) => {
-  // First go to the page and clear all storage
-  await page.goto("/");
+  // First go to the screen-ppi tool page and clear all storage
+  await page.goto("/utilities/screen-ppi/");
   await page.evaluate(() => {
     localStorage.clear();
     sessionStorage.clear();
@@ -66,7 +66,11 @@ test.describe("Screen Card Inputs", () => {
     const scaleSelect = card.locator(".screen-scale");
 
     // Find effective resolution result - get the resolution value (second one with dimensions)
-    const effectiveResValue = card.locator(".result-item").filter({ hasText: "Effective" }).locator(".result-value").last();
+    const effectiveResValue = card
+      .locator(".result-item")
+      .filter({ hasText: "Effective" })
+      .locator(".result-value")
+      .last();
     const initialValue = await effectiveResValue.textContent();
 
     await scaleSelect.selectOption("200");
@@ -80,7 +84,7 @@ test.describe("Multiple Screens", () => {
   test("should handle multiple screen cards", async ({ page }) => {
     const initialCount = await page.locator(".screen-card").count();
     const initialRects = await page.locator("#size-canvas .screen-rect").count();
-    
+
     await page.locator("#add-screen").click();
     await page.locator("#add-screen").click();
     await page.locator("#add-screen").click();
@@ -91,7 +95,7 @@ test.describe("Multiple Screens", () => {
 
   test("should show legend for multiple screens", async ({ page }) => {
     const initialLegend = await page.locator("#size-legend .legend-item").count();
-    
+
     await page.locator("#add-screen").click();
     await page.locator("#add-screen").click();
 
@@ -105,10 +109,10 @@ test.describe("Multiple Screens", () => {
     for (let i = 0; i < existingCount; i++) {
       await page.locator(".screen-card").first().locator(".btn-remove").click();
     }
-    
+
     await page.locator("#add-screen").click();
     await page.locator("#add-screen").click();
-    
+
     await expect(page.locator(".screen-card")).toHaveCount(2);
 
     // Rename first screen for identification
@@ -148,8 +152,11 @@ test.describe("Size Comparison Visualization", () => {
     const zoomSlider = page.locator("#size-zoom");
     const zoomLabel = page.locator("#zoom-label");
 
-    // Change zoom
-    await zoomSlider.fill("20");
+    // Change zoom using evaluate to properly trigger input event
+    await zoomSlider.evaluate((el) => {
+      el.value = "20";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
 
     await expect(zoomLabel).toHaveText("20 px/inch");
   });

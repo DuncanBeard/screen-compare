@@ -23,12 +23,19 @@ This site is secured with HTTPS through GitHub Pages, which provides:
 - **Forced HTTPS**: All HTTP traffic is automatically redirected to HTTPS
 
 ### Security Headers
-The site implements multiple security headers via HTML meta tags:
+
+The site implements client-side security policies via HTML meta tags:
+
+**Implemented via Meta Tags:**
 - **Content Security Policy (CSP)**: Restricts resource loading to prevent XSS attacks
-- **upgrade-insecure-requests**: Automatically upgrades HTTP requests to HTTPS
-- **X-Content-Type-Options**: Prevents MIME-sniffing attacks
-- **X-Frame-Options**: Protects against clickjacking
-- **Referrer Policy**: Controls referrer information sent with requests
+  - `default-src 'self'`: Only allow resources from same origin
+  - `script-src 'self'`: Only allow scripts from same origin (no inline scripts)
+  - `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`: Allow styles from same origin, inline styles, and Google Fonts
+  - `frame-ancestors 'self'`: Prevent clickjacking by restricting iframe embedding
+- **Referrer Policy**: Controls referrer information sent with requests (`strict-origin-when-cross-origin`)
+
+**Note on HTTP Headers:**
+Some security features like `X-Content-Type-Options` and `X-Frame-Options` require actual HTTP response headers and cannot be set via HTML meta tags. GitHub Pages provides HTTPS enforcement automatically, but for additional HTTP-level security headers, you would need a CDN or reverse proxy (e.g., Cloudflare, Netlify).
 
 ### Enabling HTTPS on GitHub Pages
 
@@ -51,26 +58,13 @@ If you fork this repository:
 
 ### Local Development
 
-Local development uses HTTP (not HTTPS) for testing:
+Local development uses HTTP for testing, which works fine with the current CSP configuration:
 
 ```bash
 npm run serve  # Starts Python HTTP server on http://localhost:8000
 ```
 
-If you need HTTPS for local testing:
-
-```bash
-# Install mkcert for local SSL certificates
-brew install mkcert  # macOS
-# or
-apt install mkcert   # Ubuntu/Debian
-
-# Create local certificate authority
-mkcert -install
-
-# Create certificate for localhost
-mkcert localhost 127.0.0.1 ::1
-```
+The site's Content Security Policy is compatible with local HTTP development. HTTPS is automatically enforced in production by GitHub Pages.
 
 ## Development
 

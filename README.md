@@ -27,15 +27,14 @@ This site is secured with HTTPS through GitHub Pages, which provides:
 The site implements client-side security policies via HTML meta tags:
 
 **Implemented via Meta Tags:**
-- **Content Security Policy (CSP)**: Restricts resource loading to prevent XSS attacks
+- **Content Security Policy (CSP)**: Restricts resource loading to help prevent XSS attacks
   - `default-src 'self'`: Only allow resources from same origin
   - `script-src 'self'`: Only allow scripts from same origin (no inline scripts)
   - `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`: Allow styles from same origin, inline styles, and Google Fonts
-  - `frame-ancestors 'self'`: Prevent clickjacking by restricting iframe embedding
 - **Referrer Policy**: Controls referrer information sent with requests (`strict-origin-when-cross-origin`)
 
 **Note on HTTP Headers:**
-Some security features like `X-Content-Type-Options` and `X-Frame-Options` require actual HTTP response headers and cannot be set via HTML meta tags. GitHub Pages provides HTTPS enforcement automatically, but for additional HTTP-level security headers, you would need a CDN or reverse proxy (e.g., Cloudflare, Netlify).
+Some security features like `X-Content-Type-Options`, `X-Frame-Options`, and CSP directives such as `frame-ancestors` require actual HTTP response headers and are not effective when set via HTML meta tags. GitHub Pages provides HTTPS enforcement automatically, but for additional HTTP-level security headers (including clickjacking protection), you would need to configure them via a CDN or reverse proxy (e.g., Cloudflare, Netlify).
 
 ### Enabling HTTPS on GitHub Pages
 

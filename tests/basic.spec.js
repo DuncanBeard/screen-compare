@@ -96,7 +96,7 @@ test.describe("Remove Screen", () => {
 
     await expect(page.locator(".screen-card")).toHaveCount(initialCount + 1);
 
-    await page.locator(".screen-card").first().locator(".btn-remove").click();
+    await page.locator(".screen-card").first().locator(".btn-card-action-delete").click();
 
     await expect(page.locator(".screen-card")).toHaveCount(initialCount);
   });

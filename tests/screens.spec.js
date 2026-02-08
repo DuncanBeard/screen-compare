@@ -107,7 +107,7 @@ test.describe("Multiple Screens", () => {
     // Clear any existing screens first
     const existingCount = await page.locator(".screen-card").count();
     for (let i = 0; i < existingCount; i++) {
-      await page.locator(".screen-card").first().locator(".btn-remove").click();
+      await page.locator(".screen-card").first().locator(".btn-card-action-delete").click();
     }
 
     await page.locator("#add-screen").click();
@@ -120,7 +120,7 @@ test.describe("Multiple Screens", () => {
     await firstCard.locator(".screen-name").fill("First Screen");
 
     // Remove the first screen
-    await firstCard.locator(".btn-remove").click();
+    await firstCard.locator(".btn-card-action-delete").click();
 
     await expect(page.locator(".screen-card")).toHaveCount(1);
 

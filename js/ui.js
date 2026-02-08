@@ -11,7 +11,7 @@ const UI = {
    * @param {Function} onRemove - Callback when remove button clicked
    * @returns {HTMLElement} The card element
    */
-  createScreenCard(screen, id, onUpdate, onRemove) {
+  createScreenCard(screen, id, onUpdate, onRemove, onDuplicate, onRotate) {
     const card = document.createElement("div");
     card.className = "screen-card";
     card.dataset.id = id;
@@ -23,7 +23,11 @@ const UI = {
                 <input type="text" value="${this.escapeHtml(screen.name)}"
                        placeholder="Screen name" class="screen-name"
                        aria-label="Screen name">
-                <button class="btn-remove" aria-label="Remove screen">&times;</button>
+                <div class="card-header-actions">
+                    <button class="btn-card-action" aria-label="Rotate screen" title="Rotate 90°">&#8635;</button>
+                    <button class="btn-card-action" aria-label="Duplicate screen" title="Duplicate">&#10697;</button>
+                    <button class="btn-card-action btn-card-action-delete" aria-label="Remove screen" title="Delete">&times;</button>
+                </div>
             </div>
             <div class="card-inputs">
                 <div class="input-row">
@@ -68,7 +72,10 @@ const UI = {
     const widthInput = card.querySelector(".screen-width");
     const heightInput = card.querySelector(".screen-height");
     const scaleSelect = card.querySelector(".screen-scale");
-    const removeBtn = card.querySelector(".btn-remove");
+    const actionBtns = card.querySelectorAll(".btn-card-action");
+    const rotateBtn = actionBtns[0];
+    const duplicateBtn = actionBtns[1];
+    const deleteBtn = actionBtns[2];
 
     const handleChange = () => {
       const updated = {
@@ -87,7 +94,9 @@ const UI = {
     heightInput.addEventListener("input", handleChange);
     scaleSelect.addEventListener("change", handleChange);
 
-    removeBtn.addEventListener("click", () => onRemove(id));
+    deleteBtn.addEventListener("click", () => onRemove(id));
+    if (onDuplicate) duplicateBtn.addEventListener("click", () => onDuplicate(id));
+    if (onRotate) rotateBtn.addEventListener("click", () => onRotate(id));
 
     return card;
   },
@@ -434,9 +443,18 @@ const UI = {
       // Get or initialize position
       let pos = this.screenPositions[screen.id];
       if (!pos) {
-        // Default position: spread horizontally
+        // Find the rightmost edge of all already-positioned screens
+        let rightmostEdge = 0;
+        for (const sid of Object.keys(this.screenPositions)) {
+          const p = this.screenPositions[sid];
+          // Find the matching screenData entry to get its width
+          const match = screenData.find((d) => d.screen.id === sid);
+          if (match) {
+            rightmostEdge = Math.max(rightmostEdge, p.x + match.dims.width);
+          }
+        }
         pos = {
-          x: padding + index * (dims.width + 20),
+          x: rightmostEdge === 0 ? padding : rightmostEdge + 20,
           y: padding
         };
         this.screenPositions[screen.id] = pos;

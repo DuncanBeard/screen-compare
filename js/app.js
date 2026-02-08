@@ -10,6 +10,15 @@ const App = {
   viewMode: "physical", // 'physical' or 'digital'
 
   /**
+   * Generate a default screen name from its specs
+   * @param {Object} screen - Screen object with size, width, height
+   * @returns {string} Generated name like '27" 2560×1440'
+   */
+  generateScreenName(screen) {
+    return `${screen.size}" ${screen.width}\u00d7${screen.height}`;
+  },
+
+  /**
    * Initialize the application
    */
   init() {
@@ -169,7 +178,18 @@ const App = {
     const zoomSlider = document.getElementById("size-zoom");
     if (zoomSlider) {
       zoomSlider.addEventListener("input", (e) => {
-        this.pixelsPerInch = parseInt(e.target.value);
+        const oldZoom = this.pixelsPerInch;
+        const newZoom = parseInt(e.target.value);
+        const ratio = newZoom / oldZoom;
+
+        // Scale all stored screen positions so the layout zooms uniformly
+        for (const id of Object.keys(UI.screenPositions)) {
+          const pos = UI.screenPositions[id];
+          pos.x *= ratio;
+          pos.y *= ratio;
+        }
+
+        this.pixelsPerInch = newZoom;
         UI.updateZoomLabel(this.pixelsPerInch, this.viewMode);
         this.updateSizeComparison();
       });
@@ -216,29 +236,52 @@ const App = {
     let startY = 0;
     let startHeight = 0;
 
-    handle.addEventListener("mousedown", (e) => {
+    const onResizeStart = (clientY) => {
       isResizing = true;
-      startY = e.clientY;
+      startY = clientY;
       startHeight = viewport.offsetHeight;
       document.body.style.cursor = "ns-resize";
       document.body.style.userSelect = "none";
-    });
+    };
 
-    document.addEventListener("mousemove", (e) => {
+    const onResizeMove = (clientY) => {
       if (!isResizing) return;
-      const dy = e.clientY - startY;
+      const dy = clientY - startY;
       const newHeight = Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + dy));
       viewport.style.height = `${newHeight}px`;
       this.updateOverflowIndicators();
-    });
+    };
 
-    document.addEventListener("mouseup", () => {
+    const onResizeEnd = () => {
       if (isResizing) {
         isResizing = false;
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
       }
+    };
+
+    handle.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      onResizeStart(e.clientY);
     });
+
+    document.addEventListener("mousemove", (e) => {
+      onResizeMove(e.clientY);
+    });
+
+    document.addEventListener("mouseup", onResizeEnd);
+
+    handle.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      onResizeStart(e.touches[0].clientY);
+    }, { passive: false });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!isResizing) return;
+      onResizeMove(e.touches[0].clientY);
+    }, { passive: false });
+
+    document.addEventListener("touchend", onResizeEnd);
   },
 
   /**
@@ -308,9 +351,8 @@ const App = {
       return;
     }
 
-    // Add a default screen
+    // Add a default screen (name will be auto-generated)
     this.addScreen({
-      name: '27" 4K Monitor',
       size: 27,
       width: 3840,
       height: 2160,
@@ -326,12 +368,21 @@ const App = {
     const id = `screen-${this.nextId++}`;
 
     const screen = screenData || {
-      name: "New Screen",
+      name: "",
       size: 27,
       width: 2560,
       height: 1440,
       scale: 100
     };
+
+    // Auto-generate name if empty/missing
+    if (!screen.name) {
+      screen.name = this.generateScreenName(screen);
+      screen.customName = false;
+    } else if (screen.customName === undefined) {
+      // For loaded screens without the flag, infer by comparing to auto-generated
+      screen.customName = screen.name !== this.generateScreenName(screen);
+    }
 
     this.screens.push({ id, ...screen });
 
@@ -339,7 +390,9 @@ const App = {
       screen,
       id,
       (cardId, updated) => this.updateScreen(cardId, updated),
-      (cardId) => this.removeScreen(cardId)
+      (cardId) => this.removeScreen(cardId),
+      (cardId) => this.duplicateScreen(cardId),
+      (cardId) => this.rotateScreen(cardId)
     );
 
     document.getElementById("comparison-grid").appendChild(card);
@@ -356,7 +409,9 @@ const App = {
     const index = this.screens.findIndex((s) => s.id === id);
     if (index === -1) return;
 
-    this.screens[index] = { id, ...data };
+    const merged = { ...this.screens[index], ...data };
+    merged.customName = merged.name !== this.generateScreenName(merged);
+    this.screens[index] = merged;
 
     // Update the card's results
     const card = document.querySelector(`.screen-card[data-id="${id}"]`);
@@ -378,6 +433,7 @@ const App = {
     if (!screen) return;
 
     screen.name = newName;
+    screen.customName = newName !== this.generateScreenName(screen);
 
     // Update the card's name input
     const card = document.querySelector(`.screen-card[data-id="${id}"]`);
@@ -421,10 +477,21 @@ const App = {
 
     // Create a copy without the ID
     const { id: _, ...screenData } = screen;
-    this.addScreen({
-      ...screenData,
-      name: screenData.name + " (copy)"
-    });
+    if (screenData.customName) {
+      // Custom-named screen: append " (copy)"
+      this.addScreen({
+        ...screenData,
+        name: screenData.name + " (copy)",
+        customName: true
+      });
+    } else {
+      // Auto-named screen: let addScreen auto-generate a fresh name
+      this.addScreen({
+        ...screenData,
+        name: "",
+        customName: undefined
+      });
+    }
   },
 
   /**

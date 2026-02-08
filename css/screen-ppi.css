@@ -197,7 +197,12 @@
     outline: none;
 }
 
-.btn-remove {
+.card-header-actions {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.btn-card-action {
     width: 28px;
     height: 28px;
     padding: 0;
@@ -213,7 +218,12 @@
     justify-content: center;
 }
 
-.btn-remove:hover {
+.btn-card-action:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+.btn-card-action-delete:hover {
     color: #ef4444;
     background-color: rgba(239, 68, 68, 0.1);
 }
@@ -500,7 +510,7 @@
 
 /* Resize Handle */
 .resize-handle {
-    height: 8px;
+    height: 16px;
     background: var(--color-bg-subtle);
     border-top: 1px solid var(--color-border-subtle);
     cursor: ns-resize;
@@ -508,6 +518,7 @@
     align-items: center;
     justify-content: center;
     transition: background var(--transition-fast);
+    touch-action: none;
 }
 
 .resize-handle::after {

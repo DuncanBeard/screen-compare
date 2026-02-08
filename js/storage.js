@@ -87,13 +87,17 @@ const Storage = {
      */
     encodeToUrl(screens) {
         // Minify the screen data for shorter URLs
-        const minified = screens.map(s => ({
-            n: s.name,
-            s: s.size,
-            w: s.width,
-            h: s.height,
-            sc: s.scale
-        }));
+        const minified = screens.map(s => {
+            const m = {
+                n: s.name,
+                s: s.size,
+                w: s.width,
+                h: s.height,
+                sc: s.scale
+            };
+            if (s.customName) m.cn = 1;
+            return m;
+        });
         const json = JSON.stringify(minified);
         // Use base64 encoding
         return btoa(encodeURIComponent(json));
@@ -113,7 +117,8 @@ const Storage = {
                 size: s.s,
                 width: s.w,
                 height: s.h,
-                scale: s.sc
+                scale: s.sc,
+                customName: !!s.cn
             }));
         } catch (e) {
             console.error('Error decoding URL:', e);

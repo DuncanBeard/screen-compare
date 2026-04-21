@@ -73,7 +73,10 @@ const Presets = {
                 { name: '34" UW 5K2K (5120x2160)', size: 34, width: 5120, height: 2160, defaultScale: 150 },
                 { name: '38" UW 1600p (3840x1600)', size: 38, width: 3840, height: 1600, defaultScale: 100 },
                 { name: '40" UW 5K2K (5120x2160)', size: 40, width: 5120, height: 2160, defaultScale: 125 },
+                { name: '40" Dell UltraSharp Thunderbolt U4025QW (5120x2160)', size: 39.7, width: 5120, height: 2160, defaultScale: 125 },
                 { name: '49" Super UW (5120x1440)', size: 49, width: 5120, height: 1440, defaultScale: 100 },
+                { name: '52" Dell UltraSharp Thunderbolt U5226KW (6144x2560)', size: 51.5, width: 6144, height: 2560, defaultScale: 125 },
+                { name: '57" Samsung Odyssey Neo G9 (7680x2160)', size: 57, width: 7680, height: 2160, defaultScale: 100 },
             ]
         },
         {

@@ -58,6 +58,12 @@ const Presets = {
             ]
         },
         {
+            name: 'Monitors - 28"',
+            devices: [
+                { name: '28" BenQ RD280U (3840x2560 3:2 120Hz)', size: 28.2, width: 3840, height: 2560, defaultScale: 150 },
+            ]
+        },
+        {
             name: 'Monitors - 32"',
             devices: [
                 { name: '32" 1080p', size: 32, width: 1920, height: 1080, defaultScale: 100 },

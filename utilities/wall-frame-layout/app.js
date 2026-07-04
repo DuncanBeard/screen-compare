@@ -75,8 +75,8 @@
   // Concrete colors (no CSS vars / color-mix in inline SVG — those break on iOS Safari).
   // Chosen to read well on both the dark-default and light themes of the site.
   const C = {
-    strip: 'rgba(140,146,166,0.12)', stripLine: '#9aa3b8', dim: '#8b93a7',
-    frame: 'rgba(234,88,12,0.16)', frameLine: '#ea580c', mark: '#e11d48'
+    strip: 'rgba(140,146,166,0.10)', stripLine: '#6e7686', dim: '#8b93a7',
+    frame: 'rgba(77,124,255,0.16)', frameLine: '#4d7cff', mark: '#e11d48'
   };
 
   function draw(v, r) {

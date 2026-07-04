@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Evenly space picture frames along a wall and get exact hanger-mark measurements from the left edge, with an optional minimum edge buffer, two-hanger support, and a printable layout.">
+    <meta name="keywords" content="picture hanging calculator, frame spacing, gallery wall layout, evenly space frames, hanger marks, wall art spacing">
+    <meta property="og:title" content="Wall Frame Layout Calculator - Duncan Beard">
+    <meta property="og:description" content="Evenly space frames along a wall and get exact hanger-mark measurements from the left edge.">
+    <meta property="og:type" content="website">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <title>Wall Frame Layout Calculator - Duncan Beard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/main.css">
+    <style>
+        .tool-main { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--space-8); }
+        .tool-header { padding: calc(var(--space-24) + var(--space-8)) 0 var(--space-8); border-bottom: 1px solid var(--color-border-subtle); }
+        .back-link {
+            display: inline-flex; align-items: center; gap: var(--space-2);
+            color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 500;
+            text-decoration: none; margin-bottom: var(--space-6); transition: color var(--transition-fast);
+        }
+        .back-link:hover { color: var(--color-accent); }
+        .tool-title {
+            font-family: var(--font-display); font-weight: 400;
+            font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl));
+            letter-spacing: -0.03em; margin-bottom: var(--space-4);
+        }
+        .tool-desc { font-size: var(--text-lg); color: var(--color-text-secondary); max-width: 640px; }
+
+        .tool-body { padding: var(--space-8) 0 var(--space-24); }
+
+        .card {
+            background-color: var(--color-bg-elevated); border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-5); }
+        label {
+            display: block; font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted);
+            text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);
+        }
+        input, select {
+            width: 100%; padding: var(--space-3) var(--space-4);
+            border: 1px solid var(--color-border); border-radius: var(--radius-md);
+            background-color: var(--color-bg-subtle); color: var(--color-text);
+            font-family: var(--font-body); font-size: var(--text-base);
+            font-variant-numeric: tabular-nums; transition: border-color var(--transition-fast);
+        }
+        input:focus, select:focus { outline: none; border-color: var(--color-accent); }
+        .hint { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-2); text-transform: none; letter-spacing: 0; font-weight: 400; }
+        .hint code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.9em;
+            background-color: var(--color-bg-subtle); padding: 1px 5px; border-radius: var(--radius-sm);
+        }
+
+        .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+
+        .chips { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+        .chip {
+            font-size: var(--text-sm); font-weight: 500;
+            background-color: var(--color-bg-subtle); border: 1px solid var(--color-border);
+            border-radius: var(--radius-full); padding: var(--space-2) var(--space-4);
+            font-variant-numeric: tabular-nums;
+        }
+        .chip b { color: var(--color-accent); font-weight: 600; }
+
+        .msg { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; margin-bottom: var(--space-6); }
+        .msg.ok { background-color: rgba(22, 163, 74, 0.12); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); }
+        .msg.err { background-color: rgba(220, 38, 38, 0.12); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.3); }
+
+        .svg-wrap { overflow-x: auto; margin-top: var(--space-5); }
+        svg { width: 100%; height: auto; display: block; }
+
+        .section-title { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 400; margin-bottom: var(--space-2); letter-spacing: -0.01em; }
+        .section-sub { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-5); }
+
+        .marks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+        .mark { background-color: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); }
+        .mark .who { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: var(--space-1); }
+        .mark .big { font-family: 'JetBrains Mono', monospace; font-size: var(--text-2xl); font-weight: 500; letter-spacing: -0.02em; }
+        .mark .dec { font-family: 'JetBrains Mono', monospace; font-size: var(--text-xs); color: var(--color-text-muted); }
+
+        table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+        th, td { text-align: right; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); }
+        th:first-child, td:first-child { text-align: left; }
+        th { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+        td { font-family: 'JetBrains Mono', monospace; }
+
+        details { margin-top: var(--space-4); }
+        summary { cursor: pointer; font-weight: 500; font-size: var(--text-sm); color: var(--color-accent); }
+        .details-body { margin-top: var(--space-4); }
+
+        @media print {
+            .nav, .footer, .grain, .actions, .no-print { display: none !important; }
+            body { background: #fff; color: #000; }
+            .card { border-color: #ccc; break-inside: avoid; }
+            .tool-header { padding-top: var(--space-4); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Grain overlay -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <nav class="nav">
+        <a href="/" class="nav-logo" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </a>
+        <div class="nav-links">
+            <a href="/utilities/" class="nav-link">Utilities</a>
+            <a href="https://github.com/duncanbeard" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="tool-main">
+        <header class="tool-header">
+            <a href="/utilities/" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Utilities
+            </a>
+            <h1 class="tool-title">Wall Frame Layout Calculator</h1>
+            <p class="tool-desc">Evenly space frames along a wall &mdash; with an optional minimum edge buffer &mdash; and get exact hanger marks measured from the left edge.</p>
+        </header>
+
+        <div class="tool-body">
+            <div class="card no-print">
+                <div class="grid">
+                    <div>
+                        <label for="wall">Wall width</label>
+                        <input id="wall" type="text" value="12'" autocomplete="off">
+                        <div class="hint">e.g. <code>144</code>, <code>12'</code>, <code>11'2"</code></div>
+                    </div>
+                    <div>
+                        <label for="frame">Frame width</label>
+                        <input id="frame" type="text" value="17.25" autocomplete="off">
+                        <div class="hint">accepts <code>17 1/4</code> or <code>17.25</code></div>
+                    </div>
+                    <div>
+                        <label for="count">Number of frames</label>
+                        <input id="count" type="number" min="1" step="1" value="4">
+                    </div>
+                    <div>
+                        <label for="pad">Extra edge buffer / side</label>
+                        <input id="pad" type="text" value="0" autocomplete="off">
+                        <div class="hint">min. margin added <em>beyond</em> the even gap</div>
+                    </div>
+                    <div>
+                        <label for="hangers">Hangers per frame</label>
+                        <select id="hangers">
+                            <option value="1">1 &mdash; centered</option>
+                            <option value="2">2 &mdash; D-rings / sawtooth</option>
+                        </select>
+                    </div>
+                    <div id="spreadWrap" style="display:none">
+                        <label for="spread">Distance between hangers</label>
+                        <input id="spread" type="text" value="8" autocomplete="off">
+                        <div class="hint">centered on frame (e.g. mounts 4"&amp;12" = 8")</div>
+                    </div>
+                    <div>
+                        <label for="prec">Round to</label>
+                        <select id="prec">
+                            <option value="8">1/8"</option>
+                            <option value="16" selected>1/16"</option>
+                            <option value="32">1/32"</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" id="ex1" type="button">&#8634; Example 1 (4 frames)</button>
+                    <button class="btn btn-secondary" id="ex2" type="button">&#8634; Example 2 (3 frames &middot; 12" buffer &middot; 2 hangers)</button>
+                    <button class="btn btn-primary" id="printBtn" type="button">&#128424; Print marks</button>
+                </div>
+            </div>
+
+            <div id="status"></div>
+
+            <div class="card">
+                <div class="chips" id="chips"></div>
+                <div class="svg-wrap"><svg id="svg" viewBox="0 0 1000 360" role="img" aria-label="wall layout preview"></svg></div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">Hanger marks</h2>
+                <p class="section-sub">Measure from the LEFT edge of the wall.</p>
+                <div class="marks" id="marks"></div>
+                <details>
+                    <summary>Full table (edges, centers, step-from-previous)</summary>
+                    <div class="details-body" style="overflow-x:auto">
+                        <table id="tbl"><thead></thead><tbody></tbody></table>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card no-print">
+                <details>
+                    <summary>Optional: vertical hanger height (from floor)</summary>
+                    <div class="details-body">
+                        <div class="grid">
+                            <div>
+                                <label for="frameH">Frame height</label>
+                                <input id="frameH" type="text" value="20" autocomplete="off">
+                                <div class="hint">also sets the preview proportions</div>
+                            </div>
+                            <div>
+                                <label for="centerH">Desired center height</label>
+                                <input id="centerH" type="text" value="57" autocomplete="off">
+                                <div class="hint">gallery standard &asymp; 57&ndash;60"</div>
+                            </div>
+                            <div>
+                                <label for="drop">Hook drop below frame top</label>
+                                <input id="drop" type="text" value="3" autocomplete="off">
+                                <div class="hint">taut wire / D-ring distance down from top edge</div>
+                            </div>
+                        </div>
+                        <div class="chips" id="vchips" style="margin-top:var(--space-5)"></div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <span class="footer-copyright">&copy; 2025 Duncan Beard</span>
+            <div class="footer-links">
+                <a href="https://github.com/duncanbeard" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hello@dbeard.dev">Email</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

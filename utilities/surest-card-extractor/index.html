@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Turn your Surest digital insurance card PDF into clean front and back images, ready to upload to any provider portal. Runs 100% in your browser — your insurance info never leaves your device.">
+    <meta name="keywords" content="surest insurance card, digital insurance card png, split insurance card pdf, front back insurance card, upload insurance card">
+    <meta property="og:title" content="Surest Card Extractor - Duncan Beard">
+    <meta property="og:description" content="Split a Surest insurance card PDF into front & back images, privately in your browser.">
+    <meta property="og:type" content="website">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <title>Surest Card Extractor - Duncan Beard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/main.css">
+    <style>
+        /* ---- Surest brand layer (scoped; overrides the site theme for this page) ---- */
+        :root {
+            --surest: #6658a6;
+            --surest-deep: #4a3d84;
+            --surest-light: #8b7fc4;
+            --surest-mist: #f2f0fa;
+            --surest-ink: #241f3d;
+        }
+        body { background: var(--surest-mist); color: var(--surest-ink); background-image: none; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #16132a; color: #ece9f7; }
+            .card-slot { background: #1e1a38 !important; }
+            .surest-panel { background: #1e1a38 !important; }
+            .meta-line { color: #a79fce !important; }
+        }
+        .nav { background: transparent; border-bottom: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .nav-logo, .nav-link { color: #fff; }
+        .nav-logo::before { content: "▚"; color: #fff; }
+        .nav-logo::after { content: "dbeard.dev"; }
+        .nav-link:hover { color: #fff; }
+        .nav-link:hover::after { background: #fff; }
+
+        .hero-band {
+            background: linear-gradient(135deg, var(--surest) 0%, var(--surest-deep) 55%, #372c66 100%);
+            color: #fff; padding: calc(var(--space-24) + var(--space-8)) var(--space-8) var(--space-16);
+            position: relative; overflow: hidden;
+        }
+        .hero-band::after {
+            content: ""; position: absolute; right: -120px; top: -120px; width: 380px; height: 380px;
+            border-radius: 50%; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.18), transparent 60%);
+        }
+        .hero-inner { max-width: var(--max-width); margin: 0 auto; position: relative; z-index: 1; }
+        .kicker { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.75); margin-bottom: var(--space-4); }
+        .hero-h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.6rem); letter-spacing: -0.03em; line-height: 1.02; margin-bottom: var(--space-5); max-width: 760px; }
+        .hero-p { font-size: var(--text-lg); color: rgba(255,255,255,0.9); max-width: 560px; line-height: 1.6; }
+        .hero-badges { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-8); }
+        .badge { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.04em; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); }
+
+        .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--space-8) var(--space-24); }
+
+        .drop {
+            margin-top: calc(var(--space-16) * -1); position: relative; z-index: 2;
+            border: none; border-radius: var(--radius-lg); padding: var(--space-12) var(--space-8);
+            text-align: center; cursor: pointer; background: #fff;
+            box-shadow: 0 20px 50px -20px rgba(74,61,132,0.5); transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        @media (prefers-color-scheme: dark) { .drop { background: #221d40; } }
+        .drop.drag { transform: translateY(-3px); box-shadow: 0 26px 60px -18px rgba(102,88,166,0.65); }
+        /* Once results render, calm the big halo so it doesn't bleed over the dark page */
+        .drop.has-results { box-shadow: 0 4px 16px -10px rgba(74,61,132,0.4); }
+        .drop-ico { width: 64px; height: 64px; margin: 0 auto var(--space-4); border-radius: var(--radius-md); background: var(--surest-mist); color: var(--surest); display: flex; align-items: center; justify-content: center; }
+        @media (prefers-color-scheme: dark) { .drop-ico { background: rgba(102,88,166,0.2); } }
+        .drop-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: var(--text-2xl); margin-bottom: var(--space-2); }
+        .drop-sub { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--surest-light); letter-spacing: 0.04em; }
+        .drop input { display: none; }
+
+        .status { font-family: var(--font-mono); font-size: var(--text-sm); margin: var(--space-8) 0 0; text-align: center; }
+        .status .err { color: #d33; }
+        .status .ok { color: var(--surest); }
+
+        .cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-10); }
+        @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+        .surest-panel { background: #fff; border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: 0 8px 30px -16px rgba(74,61,132,0.35); }
+        .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+        .panel-label { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: var(--text-lg); color: var(--surest); display: inline-flex; align-items: center; gap: var(--space-2); }
+        .panel-label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surest); }
+        .meta-line { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--surest-light); }
+        .card-slot { border-radius: 12px; overflow: hidden; background: var(--surest-mist); box-shadow: 0 4px 16px -6px rgba(74,61,132,0.4), inset 0 0 0 1px rgba(102,88,166,0.12); aspect-ratio: 1.586; display: flex; align-items: center; justify-content: center; }
+        .card-slot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        .panel-controls { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-top: var(--space-4); }
+        .seg { display: inline-flex; border: 1px solid rgba(102,88,166,0.3); border-radius: var(--radius-sm); overflow: hidden; }
+        .seg button { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; padding: var(--space-2) var(--space-3); background: transparent; color: var(--surest); border: none; border-right: 1px solid rgba(102,88,166,0.3); }
+        .seg button:last-child { border-right: none; }
+        .seg button.active { background: var(--surest); color: #fff; }
+        .size-row { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--surest-light); width: 100%; }
+        .size-row input[type=number] { width: 70px; padding: 3px 6px; border: 1px solid rgba(102,88,166,0.3); border-radius: var(--radius-sm); background: transparent; color: inherit; font-family: var(--font-mono); font-size: var(--text-xs); }
+        .size-row input[disabled] { opacity: 0.4; }
+        .surest-btns { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+        .sbtn { flex: 1; font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--surest); cursor: pointer; transition: all var(--transition-fast); }
+        .sbtn.primary { background: var(--surest); color: #fff; }
+        .sbtn.primary:hover { background: var(--surest-deep); border-color: var(--surest-deep); }
+        .sbtn.ghost { background: transparent; color: var(--surest); }
+        .sbtn.ghost:hover { background: var(--surest-mist); }
+        @media (prefers-color-scheme: dark) { .sbtn.ghost:hover { background: rgba(102,88,166,0.15); } }
+        .toast { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--surest); min-height: 1.2em; margin-top: var(--space-2); text-align: center; }
+
+        .foot-note { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--surest-light); text-align: center; margin-top: var(--space-12); line-height: 1.7; }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo" aria-label="Home"></a>
+        <div class="nav-links">
+            <a href="/utilities/" class="nav-link">Utilities</a>
+            <a href="https://github.com/duncanbeard" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </nav>
+
+    <header class="hero-band">
+        <div class="hero-inner">
+            <div class="kicker">Digital insurance card · utility</div>
+            <h1 class="hero-h1">Get clean front &amp; back images from your Surest card PDF</h1>
+            <p class="hero-p">Surest hands you both sides on one page with a “fold here” line. This splits it into two upload-ready images — privately, on your own device.</p>
+            <div class="hero-badges">
+                <span class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Never uploaded</span>
+                <span class="badge">Runs offline</span>
+                <span class="badge">Full resolution</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <label class="drop" id="drop">
+            <div class="drop-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 12h20"/></svg></div>
+            <div class="drop-title">Drop your Surest card PDF</div>
+            <div class="drop-sub">or click to choose · it never leaves your browser</div>
+            <input type="file" id="file" accept="application/pdf,.pdf">
+        </label>
+
+        <div class="status" id="status" aria-live="polite"></div>
+
+        <section class="cards" id="cards" hidden></section>
+
+        <p class="foot-note" id="footNote" hidden>
+            Not affiliated with or endorsed by Surest or UnitedHealthcare. This tool only reformats a file you already have.<br>
+            Built by Duncan Beard · everything happens locally in your browser.
+        </p>
+    </main>
+
+    <script src="../vendor/pdf.js"></script>
+    <script src="../vendor/pdf-extract.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -27,7 +27,7 @@ function proofMarkup(t) {
   // Screenshot proof link
   if (t.screenshot) {
     html += ' <a class="verify-shot" href="' + t.screenshot + '" target="_blank" rel="noopener" ' +
-      'title="See the Amtrak page this price was scraped from" aria-label="View fare evidence screenshot">View evidence 🔍</a>';
+      'title="See the Amtrak page this price was scraped from" aria-label="View fare evidence screenshot">Evidence <span aria-hidden="true">↗</span></a>';
   }
   if (t.observation_id) {
     html += '<span class="fresh-pill database" title="SQLite observation #' + t.observation_id +

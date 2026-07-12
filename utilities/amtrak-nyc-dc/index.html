@@ -195,29 +195,32 @@ body {
   padding-bottom: 8px; border-bottom: 1px solid #1a3a6a;
 }
 .trip-card {
-  background: #16213e; border: 1px solid #1a3a6a; border-radius: 8px;
+  background: #16213e; border: 1px solid #31517f; border-radius: 8px;
   padding: 14px 16px; margin-bottom: 8px;
-  display: grid; grid-template-columns: 1fr auto; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px;
   transition: all 0.2s; cursor: pointer;
   width: 100%; color: inherit; font: inherit; text-align: left;
 }
 .trip-card:hover { border-color: #4fc3f7; background: #1a2a4e; }
-.trip-card.selected-trip { border-color: #66bb6a; background: #1a3a2e; }
-.trip-info .times { font-size: 16px; font-weight: 600; color: #fff; }
-.trip-info .times .arrow { color: #6b7fa3; margin: 0 6px; }
-.trip-info .meta { font-size: 12px; color: #6b7fa3; margin-top: 4px; }
-.trip-info .meta .operator { color: #8ba4c7; }
-.trip-price { font-size: 20px; font-weight: 700; color: #66bb6a; text-align: right; }
-.trip-price .price-value.older-than-24h { color:#7f8a9c; }
-.price-age-note { display:block; margin-top:2px; color:#7f8a9c; font-size:10px; font-weight:600; }
+.trip-card.selected-trip { border-color: #78d67c; background: #1a3a2e; }
+.trip-info { min-width: 0; }
+.trip-info .times { font-size: 16px; font-weight: 650; color: #fff; white-space: nowrap; }
+.trip-info .times .arrow { color: #9fb2cf; margin: 0 6px; }
+.trip-info .meta { font-size: 12px; color: #a9bad2; margin-top: 6px; line-height: 1.5; }
+.trip-info .meta .operator { color: #b9cbe2; }
+.trip-price { min-width: 0; font-size: 20px; font-weight: 700; color: #78d67c; text-align: right; line-height: 1.25; }
+.trip-price .price-value.older-than-24h { color:#b3bfd0; }
+.price-age-note { display:block; margin-top:2px; color:#b3bfd0; font-size:10px; font-weight:600; }
 .verify-shot {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 44px; min-height: 44px; padding: 0 8px;
-  font-size: 13px; text-decoration: none; margin-left: 4px;
-  opacity: 0.8; vertical-align: middle; cursor: pointer;
-  border: 1px solid #1565c0; border-radius: 6px;
+  min-width: 44px; min-height: 44px; padding: 0 10px;
+  font-size: 13px; font-weight: 700; line-height: 1.2; text-decoration: none; margin: 6px 0 0 4px;
+  color: #dff5ff; background: #123858; vertical-align: middle; cursor: pointer;
+  border: 1px solid #4fc3f7; border-radius: 6px;
 }
-.verify-shot:hover { opacity: 1; }
+.verify-shot:visited { color: #dff5ff; }
+.verify-shot:hover { color: #fff; background:#184b70; }
+.verify-shot:focus-visible { color:#fff; background:#184b70; }
 
 /* Price-proof freshness pills */
 .fresh-pill {
@@ -453,8 +456,17 @@ body {
   .checkbox-item { min-height:40px; padding:7px 11px; }
   .price-input { min-height:40px; width:105px; }
   .provenance { display:block; } .provenance > span { display:block; margin:5px 0; } .provenance .prov-sep { display:none; }
-  .price-matrix { display:none; } .matrix-body::before { content:"The comparison grid is hidden on small screens. Use the date calendars above."; display:block; color:#8ba4c7; font-size:13px; }
+  .price-matrix { display:none; } .matrix-body::before { content:"The comparison grid is hidden on small screens. Use the date calendars above."; display:block; color:#b3bfd0; font-size:13px; }
   .rt-total { align-items:flex-start; gap:14px; flex-direction:column; }
+  .trip-card {
+    grid-template-columns:minmax(0, 1fr) minmax(118px, 42%);
+    align-items:start; gap:12px; padding:14px;
+  }
+  .trip-info .times { white-space:normal; font-size:17px; line-height:1.35; }
+  .trip-info .meta { color:#b9c6d8; font-size:12px; }
+  .trip-price { font-size:21px; }
+  .fresh-pill { font-size:10px; line-height:1.3; margin-top:5px; }
+  .verify-shot { display:flex; width:100%; margin:7px 0 0; color:#dff5ff; }
 }
 </style>
 <script src="fare_math.js"></script>

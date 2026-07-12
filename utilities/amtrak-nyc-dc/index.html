@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amtrak NYC ↔ DC — Fare Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+.header {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  padding: 24px 32px;
+  border-bottom: 1px solid #1a3a6a;
+}
+.header h1 { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.header .subtitle { font-size: 14px; color: #8ba4c7; }
+.container { max-width: 1600px; margin: 0 auto; padding: 24px; overflow: hidden; }
+
+/* Compact desktop filter toolbar */
+.filters {
+  background: #121d35;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #263a60;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+}
+.filters-header {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin-bottom:10px;
+}
+.filters-title { font-size:13px; font-weight:700; color:#dbe8fa; }
+.filters-subtitle { color:#7890b5; font-size:11px; font-weight:400; margin-left:8px; }
+.filters-grid {
+  display:grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  grid-auto-rows: minmax(76px, auto);
+  gap:8px 10px;
+  align-items:stretch;
+}
+.filters-grid > *, .filter-group { min-width:0; }
+.filter-group {
+  padding:8px 10px;
+  background:#0e1930;
+  border:1px solid #203455;
+  border-radius:7px;
+  overflow:visible;
+}
+.filter-group label {
+  display:block; font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.45px; color:#8fa7ca; margin:0 0 5px;
+}
+.filter-value {
+  display:block; float:none; font-size:11px; color:#62ccf6;
+  margin:2px 0 0; font-weight:700; line-height:1;
+}
+
+/* Precise pointer-sized sliders on desktop */
+.filter-group input[type="range"] {
+  -webkit-appearance:none; appearance:none; width:100%; height:4px;
+  background:#29456f; border-radius:4px; outline:none; margin:8px 0 4px;
+}
+.filter-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none; width:16px; height:16px;
+  background:#62ccf6; border-radius:50%; cursor:pointer;
+  border:2px solid #0e1930; box-shadow:0 0 0 1px #62ccf6;
+}
+.filter-group input[type="range"]::-moz-range-thumb {
+  width:16px; height:16px; background:#62ccf6; border-radius:50%;
+  cursor:pointer; border:2px solid #0e1930; box-shadow:0 0 0 1px #62ccf6;
+}
+.filter-group input[type="range"]::-webkit-slider-runnable-track { height:4px; background:#29456f; border-radius:4px; }
+.filter-group input[type="range"]::-moz-range-track { height:4px; background:#29456f; border-radius:4px; }
+
+/* Compact toggle switch */
+.toggle-row { display:flex; align-items:center; gap:8px; min-height:24px; }
+.toggle-switch { position:relative; width:34px; height:18px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; cursor:pointer; inset:0; background:#29415f;
+  border-radius:18px; transition:.18s; border:1px solid #3d5576;
+}
+.toggle-slider::before {
+  content:""; position:absolute; width:12px; height:12px; left:2px; bottom:2px;
+  background:#8da0bd; border-radius:50%; transition:.18s;
+}
+.toggle-switch input:checked + .toggle-slider { background:#174b3b; border-color:#55b86b; }
+.toggle-switch input:checked + .toggle-slider::before { transform:translateX(16px); background:#72d681; }
+.toggle-label { font-size:11px; line-height:1.25; color:#c4d2e7; overflow-wrap:anywhere; }
+
+/* Compact service chips */
+.checkbox-group { display:flex; flex-wrap:wrap; gap:5px; }
+.checkbox-item {
+  display:flex; align-items:center; gap:5px; min-height:28px; padding:4px 8px;
+  background:#14233e; border-radius:6px; border:1px solid #294363;
+  cursor:pointer; transition:all .15s; user-select:none;
+}
+.checkbox-item:hover { border-color:#62ccf6; }
+.checkbox-item.checked { border-color:#3e83a6; background:#17324d; }
+.checkbox-item input[type="checkbox"] { width:14px; height:14px; accent-color:#62ccf6; cursor:pointer; }
+.checkbox-item span { font-size:11px; color:#d2ddeb; }
+
+/* Compact price inputs */
+.price-range-row { display:flex; gap:6px; align-items:center; }
+.price-input {
+  width:82px; padding:5px 7px; background:#14233e; border:1px solid #294363;
+  border-radius:6px; color:#e0e8f4; font-size:12px; min-height:28px; text-align:center;
+}
+.price-input:focus { outline:none; border-color:#62ccf6; }
+.price-range-sep { color:#6f87a9; font-size:10px; }
+
+.filter-section-title {
+  font-size:10px; font-weight:700; color:#62ccf6; margin-bottom:6px;
+  padding-bottom:4px; border-bottom:1px solid #203455;
+  text-transform:uppercase; letter-spacing:.45px;
+}
+.filter-reset-btn {
+  display:inline-flex; align-items:center; padding:4px 9px; background:transparent;
+  border:1px solid #344b6c; border-radius:6px; color:#8fa7ca;
+  font-size:10px; cursor:pointer; transition:all .15s; min-height:28px;
+  line-height:1; margin:0;
+}
+.filter-reset-btn:hover { border-color:#ef6d68; color:#ff8b87; }
+
+/* Price Matrix */
+.matrix-section { margin: 24px 0; }
+.matrix-section summary { cursor:pointer; min-height:44px; padding:12px 16px; border-radius:8px; background:#16213e; border:1px solid #1a3a6a; color:#8ba4c7; font-size:15px; font-weight:600; }
+.matrix-body { padding-top: 12px; }
+.matrix-section h2 { font-size: 16px; color: #8ba4c7; margin-bottom: 4px; font-weight: 500; }
+.matrix-section .hint { font-size: 12px; color: #6b7fa3; margin-bottom: 12px; }
+.price-matrix {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid #1a3a6a;
+  border-radius: 10px;
+}
+.price-matrix table {
+  width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px;
+}
+.price-matrix th {
+  padding: 10px 8px; font-size: 12px; color: #8ba4c7;
+  background: #0f3460; font-weight: 500; text-align: center;
+  border: 1px solid #1a3a6a;
+  position: sticky; top: 0; z-index: 2;
+}
+.price-matrix th.corner {
+  background: #0a1a3a;
+  position: sticky; top: 0; left: 0; z-index: 3;
+}
+.price-matrix th.row-header {
+  text-align: right; padding-right: 12px;
+  background: #0f3460;
+  position: sticky; left: 0; z-index: 1;
+}
+.price-matrix td {
+  padding: 10px 8px; text-align: center; font-size: 14px;
+  font-weight: 600; border: 1px solid #1a3a6a; cursor: pointer;
+  transition: all 0.15s;
+}
+.price-matrix td:hover { background: #1a2a4e; transform: scale(1.02); }
+.price-matrix td.selected-cell { background: #0f3460; border: 2px solid #4fc3f7; }
+.price-matrix td.cheap { color: #66bb6a; }
+.price-matrix td.mid { color: #ffa726; }
+.price-matrix td.expensive { color: #ef5350; }
+.price-matrix td.disabled { color: #3a4a6a; cursor: default; }
+.price-matrix td.disabled:hover { background: transparent; transform: none; }
+.price-matrix td.best-cell { background: #1a3a2e; }
+.price-matrix td.priced-out {
+  color: #4a5568;
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+.price-matrix td.no-match {
+  color: #3a4a6a;
+  font-size: 11px;
+  font-weight: 400;
+  cursor: default;
+}
+.price-matrix td.no-match:hover { background: transparent; transform: none; }
+
+/* Results Grid */
+.results-section { margin-top: 24px; }
+.results-section h2 { font-size: 16px; color: #8ba4c7; margin-bottom: 12px; font-weight: 500; }
+.trip-pair-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .trip-pair-grid { grid-template-columns: 1fr; } }
+.trip-column h3 {
+  font-size: 14px; color: #4fc3f7; margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid #1a3a6a;
+}
+.trip-card {
+  background: #16213e; border: 1px solid #1a3a6a; border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 8px;
+  display: grid; grid-template-columns: 1fr auto; align-items: center;
+  transition: all 0.2s; cursor: pointer;
+  width: 100%; color: inherit; font: inherit; text-align: left;
+}
+.trip-card:hover { border-color: #4fc3f7; background: #1a2a4e; }
+.trip-card.selected-trip { border-color: #66bb6a; background: #1a3a2e; }
+.trip-info .times { font-size: 16px; font-weight: 600; color: #fff; }
+.trip-info .times .arrow { color: #6b7fa3; margin: 0 6px; }
+.trip-info .meta { font-size: 12px; color: #6b7fa3; margin-top: 4px; }
+.trip-info .meta .operator { color: #8ba4c7; }
+.trip-price { font-size: 20px; font-weight: 700; color: #66bb6a; text-align: right; }
+.trip-price .price-value.older-than-24h { color:#7f8a9c; }
+.price-age-note { display:block; margin-top:2px; color:#7f8a9c; font-size:10px; font-weight:600; }
+.verify-shot {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; padding: 0 8px;
+  font-size: 13px; text-decoration: none; margin-left: 4px;
+  opacity: 0.8; vertical-align: middle; cursor: pointer;
+  border: 1px solid #1565c0; border-radius: 6px;
+}
+.verify-shot:hover { opacity: 1; }
+
+/* Price-proof freshness pills */
+.fresh-pill {
+  display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.3px; padding: 2px 5px; border-radius: 4px; margin-left: 5px;
+  vertical-align: middle; cursor: default;
+}
+.fresh-pill.fresh { background: #14351f; color: #66bb6a; border: 1px solid #2e7d32; }
+.fresh-pill.stale { background: #3a2a14; color: #ffb74d; border: 1px solid #a15c00; }
+.fresh-pill.verified { background: #12293f; color: #4fc3f7; border: 1px solid #1565c0; }
+.fresh-pill.database { background: #2b2140; color: #ce93d8; border: 1px solid #6a3fa0; }
+.price-change { display:block; font-size:10px; font-weight:600; color:#8ba4c7; margin-top:3px; }
+.price-change.up { color:#ffb74d; }
+.price-change.down { color:#66bb6a; }
+.load-error { background:#3a1717; border:1px solid #b64b4b; color:#ffc7c7; padding:14px 18px; border-radius:8px; margin-bottom:20px; }
+
+/* Provenance banner under header */
+.provenance {
+  background: #16213e; border: 1px solid #1a3a6a; border-left: 3px solid #4fc3f7;
+  border-radius: 8px; padding: 10px 16px; margin: 0 0 20px 0;
+  font-size: 12px; color: #8ba4c7; display: flex; flex-wrap: wrap;
+  gap: 14px; align-items: center;
+}
+.provenance .prov-strong { color: #e0e0e0; font-weight: 600; }
+.provenance .prov-fresh { color: #66bb6a; font-weight: 600; }
+.provenance .prov-stale { color: #ffb74d; font-weight: 600; }
+.provenance .prov-sep { color: #33507a; }
+
+/* Round Trip Total */
+.rt-total {
+  background: linear-gradient(135deg, #1a3a2e, #16213e);
+  border: 2px solid #66bb6a; border-radius: 12px;
+  padding: 20px 24px; margin-top: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.rt-total .label { font-size: 14px; color: #8ba4c7; }
+.rt-total .breakdown { font-size: 13px; color: #6b7fa3; margin-top: 4px; }
+.rt-total .total-price { font-size: 32px; font-weight: 700; color: #66bb6a; }
+.rt-total .per-person { font-size: 12px; color: #8ba4c7; text-align: right; }
+.book-link { display:inline-flex; align-items:center; justify-content:center; min-height:44px; margin-top:10px; padding:0 14px; border-radius:7px; color:#071728; background:#4fc3f7; text-decoration:none; font-size:13px; font-weight:700; }
+
+.no-results { text-align: center; padding: 40px; color: #6b7fa3; font-size: 14px; }
+
+.badge {
+  display: inline-block; padding: 2px 6px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase; margin-left: 6px;
+}
+.badge.acela { background: #4a148c; color: #ce93d8; }
+.badge.regional { background: #1a3a6a; color: #4fc3f7; }
+.badge.other { background: #3e2723; color: #bcaaa4; }
+
+.best-deal-badge {
+  display: inline-block; background: #1b5e20; color: #a5d6a7;
+  padding: 2px 8px; border-radius: 4px; font-size: 10px;
+  font-weight: 700; text-transform: uppercase; margin-left: 8px;
+}
+
+.data-note {
+  font-size: 12px; color: #6b7fa3; text-align: center;
+  margin-top: 24px; padding: 12px; border-top: 1px solid #1a3a6a;
+}
+
+.legend {
+  display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; align-items: center;
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend-dot.cheap { background: #66bb6a; }
+.legend-dot.mid { background: #ffa726; }
+.legend-dot.expensive { background: #ef5350; }
+.legend-dot.priced-out { background: #4a5568; }
+
+/* Active filter count */
+.filter-count {
+  display: inline-block;
+  background: #4fc3f7;
+  color: #0f3460;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+}
+
+/* Calendar Picker */
+.calendar-section {
+  margin-bottom: 24px;
+}
+.calendar-section h2 {
+  font-size: 16px; color: #8ba4c7; margin-bottom: 4px; font-weight: 500;
+}
+.calendar-section .hint {
+  font-size: 12px; color: #6b7fa3; margin-bottom: 12px;
+}
+.calendar-phase-indicator {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  font-size: 13px; flex-wrap: wrap;
+}
+.phase-step {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  background: #0f3460; border: 1px solid #1a3a6a;
+  color: #6b7fa3; transition: all 0.2s;
+}
+.phase-step.active { border-color: #4fc3f7; color: #4fc3f7; background: #1a2a4e; }
+.phase-step.done { border-color: #66bb6a; color: #66bb6a; background: #1a3a2e; }
+.phase-step .step-num {
+  width: 20px; height: 20px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 11px;
+  font-weight: 700; background: #1a3a6a; color: #6b7fa3;
+}
+.phase-step.active .step-num { background: #4fc3f7; color: #0f3460; }
+.phase-step.done .step-num { background: #66bb6a; color: #0f3460; }
+.phase-arrow { color: #3a4a6a; font-size: 16px; }
+.calendar-reset-btn {
+  display: inline-block; padding: 6px 14px; background: #0f3460;
+  border: 1px solid #1a3a6a; border-radius: 6px; color: #8ba4c7;
+  font-size: 12px; cursor: pointer; transition: all 0.2s;
+  min-height: 36px; line-height: 24px; margin-left: auto;
+}
+.calendar-reset-btn:hover { border-color: #ef5350; color: #ef5350; }
+
+.calendar-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+@media (max-width: 768px) { .calendar-container { grid-template-columns: 1fr; } }
+
+.calendar-month {
+  background: #16213e; border: 1px solid #1a3a6a; border-radius: 12px;
+  padding: 16px; overflow: hidden;
+}
+.month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.month-nav .month-title {
+  font-size: 15px; font-weight: 600; color: #e0e0e0;
+}
+.month-nav button {
+  background: #0f3460; border: 1px solid #1a3a6a; border-radius: 6px;
+  color: #8ba4c7; width: 36px; height: 36px; cursor: pointer;
+  font-size: 16px; transition: all 0.2s; display: flex;
+  align-items: center; justify-content: center;
+}
+.month-nav button:hover { border-color: #4fc3f7; color: #4fc3f7; }
+.month-nav button:disabled { opacity: 0.3; cursor: default; }
+.month-nav button:disabled:hover { border-color: #1a3a6a; color: #8ba4c7; }
+
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+}
+.cal-dow {
+  text-align: center; font-size: 11px; color: #6b7fa3;
+  padding: 4px 0; font-weight: 500;
+}
+.cal-cell {
+  min-height: 48px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; padding: 4px 2px;
+  border: 1px solid transparent; position: relative;
+  background: transparent; color: inherit; font: inherit; width: 100%;
+}
+.cal-cell:hover { background: #1a2a4e; border-color: #1a3a6a; }
+.cal-cell.empty { cursor: default; }
+.cal-cell.empty:hover { background: transparent; border-color: transparent; }
+.cal-cell .cal-day {
+  font-size: 13px; font-weight: 500; color: #e0e0e0; line-height: 1.2;
+}
+.cal-cell .cal-price {
+  font-size: 10px; font-weight: 600; margin-top: 2px; line-height: 1;
+}
+.cal-cell.cal-cheap .cal-price { color: #66bb6a; }
+.cal-cell.cal-mid .cal-price { color: #ffa726; }
+.cal-cell.cal-expensive .cal-price { color: #ef5350; }
+.cal-cell.cal-over-24h .cal-price { color:#7f8a9c; }
+.cal-cell.cal-over-24h .cal-price::after { content:" · >24h"; font-size:8px; }
+.cal-cell.cal-priced-out .cal-price { color: #4a5568; text-decoration: line-through; }
+.cal-cell.cal-priced-out .cal-day { color: #4a5568; }
+.cal-cell.cal-no-data { opacity: 0.3; cursor: default; }
+.cal-cell.cal-no-data:hover { background: transparent; border-color: transparent; }
+.cal-cell.cal-no-data .cal-day { color: #3a4a6a; }
+.cal-cell.cal-selected {
+  background: #1a3a2e; border-color: #66bb6a;
+}
+.cal-cell.cal-selected .cal-day { color: #66bb6a; font-weight: 700; }
+.cal-cell.cal-in-range {
+  background: #162a3e; border-color: #1a3a6a;
+}
+.cal-cell.cal-today .cal-day {
+  text-decoration: underline;
+}
+.cal-cell.cal-past { opacity: 0.4; cursor: default; }
+.cal-cell.cal-past:hover { background: transparent; border-color: transparent; }
+.cal-cell.cal-best { background: #1a3a2e; }
+
+/* Calendar detail panel */
+.cal-detail {
+  background: #16213e; border: 1px solid #1a3a6a; border-radius: 12px;
+  padding: 20px; margin-top: 16px;
+}
+.cal-detail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+.cal-detail-title {
+  font-size: 14px; font-weight: 600; color: #4fc3f7;
+}
+.cal-detail-date {
+  font-size: 13px; color: #8ba4c7;
+}
+.cal-detail-trains {
+  display: grid; gap: 8px;
+}
+*:focus-visible { outline: 3px solid #ffd166; outline-offset: 3px; }
+@media (max-width: 1300px) {
+  .filters-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+  .filters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 640px) {
+  .header { padding:18px 16px; } .container { padding:14px; } .filters { padding:12px; }
+  .filters-header { align-items:flex-start; } .filters-subtitle { display:none; }
+  .filters-grid { grid-template-columns:1fr; }
+  .filter-group { padding:10px 12px; }
+  .filter-group input[type="range"] { height:8px; margin:14px 0 8px; }
+  .filter-group input[type="range"]::-webkit-slider-thumb { width:32px; height:32px; }
+  .filter-group input[type="range"]::-moz-range-thumb { width:32px; height:32px; }
+  .toggle-row { min-height:40px; } .toggle-switch { width:44px; height:24px; }
+  .toggle-slider::before { width:18px; height:18px; }
+  .toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); }
+  .checkbox-item { min-height:40px; padding:7px 11px; }
+  .price-input { min-height:40px; width:105px; }
+  .provenance { display:block; } .provenance > span { display:block; margin:5px 0; } .provenance .prov-sep { display:none; }
+  .price-matrix { display:none; } .matrix-body::before { content:"The comparison grid is hidden on small screens. Use the date calendars above."; display:block; color:#8ba4c7; font-size:13px; }
+  .rt-total { align-items:flex-start; gap:14px; flex-direction:column; }
+}
+</style>
+<script src="fare_math.js"></script>
+</head>
+<body>
+<div class="header">
+  <h1>🚂 Amtrak NYC ↔ DC Fare Explorer</h1>
+  <div class="subtitle">Northeast Regional & Acela — Pick any departure + return date</div>
+</div>
+<div class="container" style="padding-bottom:0;">
+  <div class="provenance" id="provenance" role="status" aria-live="polite">Loading verified fare observations…</div>
+</div>
+
+<div class="container">
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filters-header">
+      <div class="filters-title">Trip filters <span class="filters-subtitle">Applied instantly to calendars and fares</span></div>
+      <button class="filter-reset-btn" id="filter-reset">Reset</button>
+    </div>
+    <div class="filters-grid">
+      <!-- Time filters -->
+      <div class="filter-group">
+        <div class="filter-section-title">⏰ Time Window</div>
+        <label for="filter-depart-early">Earliest Departure</label>
+        <input type="range" id="filter-depart-early" min="4" max="23" value="4" step="1">
+        <div class="filter-value" id="val-depart-early">4:00 AM</div>
+      </div>
+      <div class="filter-group">
+        <label for="filter-arrive-late">Latest Arrival</label>
+        <input type="range" id="filter-arrive-late" min="6" max="24" value="24" step="1">
+        <div class="filter-value" id="val-arrive-late">12:00 AM</div>
+      </div>
+
+      <!-- Overnight toggle -->
+      <div class="filter-group">
+        <div class="filter-section-title">🌙 Overnight Rides</div>
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="filter-overnight">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Exclude overnight (depart after 10 PM or arrive after midnight)</span>
+        </div>
+      </div>
+
+      <!-- Duration filter -->
+      <div class="filter-group">
+        <div class="filter-section-title">🛡 Data Trust</div>
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="filter-stale">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Include stale fares (off by default)</span>
+        </div>
+      </div>
+
+      <!-- Duration filter -->
+      <div class="filter-group">
+        <div class="filter-section-title">⏱ Max Trip Duration</div>
+        <input type="range" id="filter-duration" aria-label="Maximum trip duration" min="3" max="18" value="18" step="0.5">
+        <div class="filter-value" id="val-duration">18h (no limit)</div>
+      </div>
+
+      <!-- Service type checkboxes -->
+      <div class="filter-group">
+        <div class="filter-section-title">🚄 Service Type</div>
+        <div class="checkbox-group" id="service-checkboxes">
+          <label class="checkbox-item checked">
+            <input type="checkbox" value="regional" checked>
+            <span>Northeast Regional</span>
+          </label>
+          <label class="checkbox-item checked">
+            <input type="checkbox" value="acela" checked>
+            <span>Acela</span>
+          </label>
+          <label class="checkbox-item checked">
+            <input type="checkbox" value="long_distance" checked>
+            <span>Long Distance</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Price filter -->
+      <div class="filter-group">
+        <div class="filter-section-title">💰 Price Range (per one-way leg)</div>
+        <div class="price-range-row">
+          <input type="number" class="price-input" id="filter-price-min" aria-label="Minimum one-way price" placeholder="Min $" min="0" value="">
+          <span class="price-range-sep">to</span>
+          <input type="number" class="price-input" id="filter-price-max" aria-label="Maximum one-way price" placeholder="Max $" min="0" value="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Picker -->
+  <div class="calendar-section">
+    <h2>📅 Calendar — Pick Outbound & Return Dates</h2>
+    <div class="hint">Prices are minimum feasible round-trip totals with all filters applied. Pick an outbound date, then each eligible return date updates to that trip’s total.</div>
+    <div class="calendar-phase-indicator" id="cal-phase">
+      <div class="phase-step active" id="phase-1"><span class="step-num">1</span> Pick outbound date</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-step" id="phase-2"><span class="step-num">2</span> Pick return date</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-step" id="phase-3"><span class="step-num">3</span> View trains</div>
+      <button class="calendar-reset-btn" id="cal-reset" style="display:none;">↺ Start Over</button>
+    </div>
+    <div class="calendar-container" id="cal-container"></div>
+    <div id="cal-detail-panel"></div>
+  </div>
+
+  <!-- Price Matrix: advanced secondary view -->
+  <details class="matrix-section">
+    <summary>Advanced: compare every date pair in a price grid</summary>
+    <div class="matrix-body">
+    <h2>Price Grid — Cheapest Round Trip by Date Pair</h2>
+    <div class="hint">Rows = departure date (NYC→DC) · Columns = return date (DC→NYC) · Click a cell to see trains</div>
+    <div class="legend">
+      <span style="color:#6b7fa3">Prices:</span>
+      <div class="legend-item"><div class="legend-dot cheap"></div> Cheapest</div>
+      <div class="legend-item"><div class="legend-dot mid"></div> Mid</div>
+      <div class="legend-item"><div class="legend-dot expensive"></div> Pricey</div>
+      <div class="legend-item"><div class="legend-dot priced-out"></div> Priced Out</div>
+    </div>
+    <div class="price-matrix" id="price-matrix"></div>
+    </div>
+  </details>
+
+  <!-- Results -->
+  <div class="results-section" id="results-section" style="display:none;">
+    <h2 id="results-title">Trains for selected dates</h2>
+    <div class="trip-pair-grid">
+      <div class="trip-column">
+        <h3 id="outbound-header">🔵 Outbound: NYC → DC</h3>
+        <div id="outbound-trips"></div>
+      </div>
+      <div class="trip-column">
+        <h3 id="return-header">🟢 Return: DC → NYC</h3>
+        <div id="return-trips"></div>
+      </div>
+    </div>
+
+    <div class="rt-total" id="rt-total" style="display:none;">
+      <div>
+        <div class="label">Round Trip Total</div>
+        <div class="breakdown" id="rt-breakdown"></div>
+      </div>
+      <div>
+        <div class="total-price" id="rt-price">—</div>
+        <div class="per-person">per person, coach</div>
+        <a class="book-link" href="https://www.amtrak.com/home.html" target="_blank" rel="noopener">Re-check fare / Book on Amtrak ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-note">
+    These are historical fare observations scraped from Amtrak.com, not guaranteed live quotes. Re-check on Amtrak before purchase.<br>
+    Amtrak round trip = 2× one-way (no RT discount). All fares are Coach class.<br>
+    <b>Price proof:</b> <span class="fresh-pill fresh">✓ fresh</span> scraped within 3 days ·
+    <span class="fresh-pill stale">⚠ N days ago</span> older, may have drifted ·
+    🔍 <span class="fresh-pill verified">proof</span> opens the screenshot of the exact Amtrak page this price came from. The scrape date is shown with each fare.
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

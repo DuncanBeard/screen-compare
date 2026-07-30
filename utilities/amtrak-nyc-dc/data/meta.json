@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-29T10:10:01.854579+00:00",
-  "generated_date": "2026-07-29",
-  "trip_count": 4139,
-  "fresh_count": 390,
-  "screenshot_count": 3921,
+  "generated_at": "2026-07-30T10:09:22.101015+00:00",
+  "generated_date": "2026-07-30",
+  "trip_count": 4063,
+  "fresh_count": 398,
+  "screenshot_count": 3925,
   "fresh_max_age_days": 3,
   "date_range": [
-    "2026-07-29",
+    "2026-07-30",
     "2026-09-23"
   ],
   "last_scrape_by_direction": {
-    "nyc_to_dc": "2026-07-29",
-    "dc_to_nyc": "2026-07-29"
+    "nyc_to_dc": "2026-07-30",
+    "dc_to_nyc": "2026-07-30"
   }
 }

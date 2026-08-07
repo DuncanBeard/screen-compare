@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Duncan Beard - dbeard.dev">
+    <meta property="og:title" content="Duncan Beard">
+    <meta property="og:type" content="website">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <title>Duncan Beard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .construction {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: var(--space-8);
+        }
+        .construction-title {
+            font-family: var(--font-display);
+            font-size: clamp(var(--text-3xl), 8vw, var(--text-5xl));
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-6);
+        }
+        .construction-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-8);
+        }
+        .construction-links {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Grain overlay -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <main class="construction">
+        <h1 class="construction-title">Under Construction</h1>
+        <p class="construction-subtitle">In the meantime, check out:</p>
+        <div class="construction-links">
+            <a href="/utilities/" class="btn btn-primary">Utilities</a>
+            <a href="https://github.com/duncanbeard" class="btn btn-secondary" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "screen-ppi-site",
+  "version": "1.0.0",
+  "description": "Screen PPI Comparison Tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report",
+    "serve": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duncanbeard/screen-compare.git"
+  },
+  "keywords": [ ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/duncanbeard/screen-compare/issues"
+  },
+  "homepage": "https://github.com/duncanbeard/screen-compare#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}
